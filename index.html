@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health - AI Clinical Assistant</title>
+    <title>Mira Health - Clinical Luxury Monitoring</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -12,8 +12,19 @@
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); }
         .mira-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
         .premium-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
-        .animate-slide-up { animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .card-dark { background: #0f172a; }
+        .pulse-soft { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Chat Animations */
+        .chat-open { animation: slideUp 0.4s ease-out forwards; }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
         .chat-container::-webkit-scrollbar { width: 4px; }
         .chat-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
@@ -27,84 +38,102 @@
                 <div class="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl overflow-hidden border-4 border-white">
                     <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover" alt="Mira Logo">
                 </div>
-                <h2 class="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Registrasi</h2>
+                <h2 class="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">Registrasi</h2>
             </div>
             <div class="space-y-4">
-                <input id="input-nama" type="text" placeholder="Nama Pasien" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold text-sm focus:ring-2 focus:ring-indigo-400">
-                <input id="input-kamar" type="text" placeholder="Nomor Kamar" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold text-sm focus:ring-2 focus:ring-indigo-400">
-                <select id="input-jk" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold text-sm focus:ring-2 focus:ring-indigo-400">
+                <input id="input-nama" type="text" placeholder="Nama Pasien" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold">
+                <input id="input-kamar" type="text" placeholder="Nomor Kamar" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold">
+                <select id="input-jk" class="w-full bg-slate-50 p-5 rounded-2xl border border-slate-100 font-bold">
                     <option value="LAKI-LAKI">LAKI-LAKI</option>
                     <option value="PEREMPUAN">PEREMPUAN</option>
                 </select>
             </div>
-            <button onclick="saveIdentity()" class="w-full bg-slate-900 text-white font-bold py-6 rounded-3xl tracking-[0.3em] text-[10px] uppercase">Mulai Monitoring</button>
+            <button onclick="saveIdentity()" class="w-full bg-slate-900 text-white font-bold py-6 rounded-3xl uppercase tracking-widest text-xs">Mulai Monitoring</button>
         </div>
 
         <div id="main-dashboard" class="hidden">
-            <div class="bg-slate-900 p-8 text-white">
+            <div class="card-dark p-8 text-white">
                 <div class="flex justify-between items-start">
-                    <div>
+                    <div class="space-y-2">
                         <span id="display-jk-tag" class="text-[9px] bg-indigo-500 px-3 py-1 rounded-full font-black uppercase tracking-widest"></span>
-                        <h1 id="display-nama" class="text-3xl font-black tracking-tighter italic uppercase mt-2"></h1>
-                        <p id="display-info" class="text-[10px] opacity-60 font-bold uppercase"></p>
+                        <h1 id="display-nama" class="text-3xl font-black tracking-tighter italic uppercase"></h1>
+                        <p id="display-info" class="text-[10px] opacity-60 font-bold uppercase tracking-widest"></p>
                     </div>
-                    <button onclick="resetApp()" class="text-white/40 hover:text-red-400"><i class="fas fa-power-off"></i></button>
+                    <button onclick="resetApp()" class="text-white/30 hover:text-red-400"><i class="fas fa-power-off"></i></button>
                 </div>
             </div>
 
-            <div class="p-8 space-y-6 bg-white rounded-t-[3rem] -mt-6 relative z-20">
-                <div class="space-y-4 text-center">
-                    <span id="status-percent" class="text-5xl font-black text-indigo-600 tracking-tighter">0%</span>
-                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div class="p-8 space-y-8 bg-white rounded-t-[3rem] -mt-6 relative z-10">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <h3 class="font-bold text-slate-800 text-sm uppercase">Status Cairan</h3>
+                        <span id="status-percent" class="text-4xl font-black text-indigo-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden">
                         <div id="progress-bar" class="mira-gradient h-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div id="health-alert" class="hidden p-5 rounded-3xl flex items-start gap-4 border text-[11px] font-bold uppercase tracking-tight shadow-sm">
+                        <i id="alert-icon" class="fas fa-info-circle mt-1 text-lg"></i>
+                        <p id="alert-text"></p>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 space-y-4">
-                    <div class="flex gap-2">
-                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 bg-white p-4 rounded-xl shadow-sm outline-none font-bold">
-                        <select id="fluid-type" class="bg-white p-4 rounded-xl font-bold shadow-sm outline-none">
+                <div class="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 space-y-5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm overflow-hidden">
+                            <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
+                        </div>
+                        <h4 class="font-black text-slate-800 text-sm uppercase">Input Record</h4>
+                    </div>
+                    <div class="flex gap-3">
+                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 bg-white p-5 rounded-2xl shadow-inner outline-none font-bold text-xl">
+                        <select id="fluid-type" class="bg-white p-5 rounded-2xl font-bold px-6 outline-none">
                             <option value="IN">MINUM</option>
                             <option value="OUT">URIN</option>
                         </select>
                     </div>
-                    <button onclick="addRecord()" id="btn-simpan" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest">Simpan & Sinkron</button>
+                    <button id="btn-simpan" onclick="addRecord()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-[2rem] text-[10px] uppercase tracking-[0.2em] shadow-xl">Simpan & Sinkron</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <button onclick="toggleChat()" id="mira-fab" class="hidden fixed bottom-8 right-8 w-16 h-16 rounded-full mira-gradient shadow-2xl border-4 border-white flex items-center justify-center transition-transform active:scale-90 z-[100] overflow-hidden">
+    <button id="mira-chat-trigger" onclick="toggleChat()" class="hidden fixed bottom-8 right-8 w-16 h-16 rounded-full shadow-2xl mira-gradient border-4 border-white flex items-center justify-center transition-all active:scale-90 hover:rotate-12 z-[100] overflow-hidden">
         <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
     </button>
 
-    <div id="chat-panel" class="hidden fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-sm flex items-end justify-center p-4">
-        <div class="bg-white w-full max-w-md h-[75vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-slide-up">
+    <div id="chat-panel" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-end justify-center p-4">
+        <div class="bg-white w-full max-w-md h-[80vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden chat-open">
             <div class="mira-gradient p-6 text-white flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white rounded-xl overflow-hidden shadow-lg border border-white/20">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-2xl overflow-hidden border border-white/20 shadow-lg">
                         <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
                     </div>
                     <div>
-                        <h3 class="font-black text-sm uppercase">Mira.AI</h3>
-                        <span class="text-[8px] font-bold opacity-70 tracking-widest uppercase">Clinical Agent Active</span>
+                        <h3 class="font-black text-sm uppercase tracking-tight">Mira.AI Agent</h3>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                            <span class="text-[9px] font-bold opacity-70 uppercase tracking-widest">Clinical Assistant</span>
+                        </div>
                     </div>
                 </div>
-                <button onclick="toggleChat()" class="text-white/60 hover:text-white"><i class="fas fa-times"></i></button>
+                <button onclick="toggleChat()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            
-            <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-4 chat-container bg-slate-50/50">
-                <div class="flex gap-3 max-w-[85%] animate-fade-in">
-                    <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">M</div>
-                    <div class="bg-white p-4 rounded-[1.5rem] rounded-tl-none shadow-sm border border-slate-100">
-                        <p class="text-xs font-bold text-slate-800 leading-relaxed">Halo! Saya Mira.AI. Ada yang bisa saya bantu terkait kondisi asupan cairan Anda hari ini?</p>
+
+            <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto chat-container bg-slate-50/50">
+                <div class="flex gap-3 max-w-[85%]">
+                    <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                    <div class="bg-white p-4 rounded-3xl rounded-tl-none border border-slate-100 shadow-sm">
+                        <p class="text-xs font-bold text-slate-800 leading-relaxed">Halo! Saya Mira.AI. Bagaimana kondisi Anda hari ini? Saya siap membantu memantau asupan cairan Anda.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-white border-t border-slate-100 flex gap-2">
-                <input id="chat-input" type="text" placeholder="Tanya Mira..." class="flex-1 bg-slate-100 p-4 rounded-2xl outline-none text-xs font-bold focus:ring-2 focus:ring-indigo-400">
-                <button onclick="sendMessage()" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center transition-all active:scale-90 shadow-lg">
+            <div class="p-6 bg-white border-t border-slate-100 flex gap-3">
+                <input id="user-msg" type="text" placeholder="Tanyakan kondisi medis Anda..." class="flex-1 bg-slate-100 p-5 rounded-2xl outline-none font-bold text-xs focus:ring-2 focus:ring-indigo-400 transition-all">
+                <button onclick="sendToMira()" class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90">
                     <i class="fas fa-paper-plane text-xs"></i>
                 </button>
             </div>
@@ -131,30 +160,35 @@
             if(nama) {
                 document.getElementById('setup-form').classList.add('hidden');
                 document.getElementById('main-dashboard').classList.remove('hidden');
-                document.getElementById('mira-fab').classList.remove('hidden');
+                document.getElementById('mira-chat-trigger').classList.remove('hidden');
                 document.getElementById('display-nama').innerText = nama;
                 document.getElementById('display-jk-tag').innerText = localStorage.getItem('pasien_jk');
-                document.getElementById('display-info').innerText = `Kamar ${localStorage.getItem('pasien_kamar')} • RSUD Luxury`;
+                document.getElementById('display-info').innerText = `KAMAR ${localStorage.getItem('pasien_kamar')} • RSUD LUXURY`;
                 updateUI();
             }
         }
 
         async function addRecord() {
             const amountInput = document.getElementById('fluid-amount');
-            const amount = parseInt(amountInput.value);
+            const amount = amountInput.value;
             const type = document.getElementById('fluid-type').value;
-            if(!amount || amount <= 0) return alert("Isi ml!");
-            
-            // Logika simpan cloud (no-cors)
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ nama: localStorage.getItem('pasien_nama'), amount, type }) });
+            const btn = document.getElementById('btn-simpan');
+            if(!amount || amount <= 0) return alert("Masukkan jumlah ml!");
+            btn.disabled = true; btn.innerHTML = "SINKRONISASI...";
 
-            if(type === 'IN') {
-                let current = parseInt(localStorage.getItem('totalIn') || 0);
-                localStorage.setItem('totalIn', current + amount);
+            const payload = { nama: localStorage.getItem('pasien_nama'), amount, type };
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                if(type === 'IN') {
+                    let current = parseInt(localStorage.getItem('totalIn') || 0);
+                    localStorage.setItem('totalIn', current + parseInt(amount));
+                }
+                updateUI();
+                amountInput.value = '';
+                alert("Data Sinkron!");
+            } finally {
+                btn.disabled = false; btn.innerHTML = "Simpan & Sinkron";
             }
-            updateUI();
-            amountInput.value = '';
-            alert("Data Tersinkron!");
         }
 
         function updateUI() {
@@ -162,38 +196,55 @@
             const percent = Math.min((totalIn / LIMIT_HARIAN) * 100, 100);
             document.getElementById('progress-bar').style.width = percent + "%";
             document.getElementById('status-percent').innerText = Math.round(percent) + "%";
+            
+            const alertBox = document.getElementById('health-alert');
+            alertBox.classList.remove('hidden');
+            if(percent >= 100) {
+                alertBox.className = "p-5 rounded-3xl flex items-start gap-4 bg-red-50 border-red-100 text-red-700 shadow-sm";
+                document.getElementById('alert-text').innerText = "DANGER! Hentikan asupan cairan tambahan segera.";
+            } else {
+                alertBox.className = "p-5 rounded-3xl flex items-start gap-4 bg-emerald-50 border-emerald-100 text-emerald-700 shadow-sm";
+                document.getElementById('alert-text').innerText = "SAFE. Hidrasi Anda dalam batas normal.";
+            }
         }
 
+        // --- MIRA.AI CHAT AGENT LOGIC ---
         function toggleChat() {
             document.getElementById('chat-panel').classList.toggle('hidden');
         }
 
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const box = document.getElementById('chat-box');
+        function sendToMira() {
+            const input = document.getElementById('user-msg');
+            const box = document.getElementById('chat-messages');
             if(!input.value) return;
 
-            // User Message
-            box.innerHTML += `<div class="flex justify-end animate-fade-in"><div class="bg-indigo-600 text-white p-4 rounded-[1.5rem] rounded-tr-none shadow-md max-w-[85%]"><p class="text-xs font-bold leading-relaxed">${input.value}</p></div></div>`;
+            // User Chat Bubble
+            box.innerHTML += `<div class="flex justify-end animate-fade-in"><div class="bg-indigo-600 text-white p-4 rounded-3xl rounded-tr-none shadow-md max-w-[85%]"><p class="text-xs font-bold leading-relaxed">${input.value}</p></div></div>`;
             
-            const userQuery = input.value.toLowerCase();
+            const userMsg = input.value.toLowerCase();
             input.value = '';
             box.scrollTop = box.scrollHeight;
 
-            // Mira AI logic (Simulasi Respons Cerdas)
+            // Mira Response Logic
             setTimeout(() => {
-                const totalIn = parseInt(localStorage.getItem('totalIn') || 0);
-                let response = "Saya mengerti. Saya akan memantau data asupan Anda. Apakah ada keluhan spesifik seperti bengkak atau sesak napas?";
+                let response = "Tentu, saya sedang memantau data Anda. Apakah ada keluhan sesak napas?";
+                const total = parseInt(localStorage.getItem('totalIn') || 0);
                 
-                if(userQuery.includes("status") || userQuery.includes("minum")) {
-                    response = `Saat ini total asupan minum Anda adalah ${totalIn}ml dari target ${LIMIT_HARIAN}ml harian.`;
-                }
-                
-                if(totalIn >= LIMIT_HARIAN) {
-                    response = "Peringatan Medis! Total asupan Anda sudah mencapai batas maksimal 1500ml. Mohon stop minum sementara dan tunggu instruksi dokter.";
+                if(userMsg.includes("status") || userMsg.includes("berapa")) {
+                    response = `Saat ini asupan Anda adalah ${total}ml. Batas harian Anda adalah 1500ml.`;
+                } else if(userMsg.includes("sesak") || userMsg.includes("napas")) {
+                    response = "Jika Anda merasa sesak, mohon segera tekan tombol panggil suster di samping bed Anda!";
+                } else if(total >= LIMIT_HARIAN) {
+                    response = "Status saat ini: Anda sudah mencapai batas cairan. Mohon jangan minum lagi sementara waktu.";
                 }
 
-                box.innerHTML += `<div class="flex gap-3 animate-fade-in"><div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-[10px] text-white font-bold">M</div><div class="bg-white p-4 rounded-[1.5rem] rounded-tl-none shadow-sm border border-slate-100"><p class="text-xs font-bold text-slate-800 leading-relaxed">${response}</p></div></div>`;
+                box.innerHTML += `
+                    <div class="flex gap-3 max-w-[85%] animate-fade-in">
+                        <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                        <div class="bg-white p-4 rounded-3xl rounded-tl-none border border-slate-100 shadow-sm">
+                            <p class="text-xs font-bold text-slate-800 leading-relaxed">${response}</p>
+                        </div>
+                    </div>`;
                 box.scrollTop = box.scrollHeight;
             }, 800);
         }
