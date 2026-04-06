@@ -209,4 +209,124 @@
             document.getElementById('patient-name').innerText = name;
             document.getElementById('patient-room').innerText = `KAMAR ${room}`;
             try {
-                const response = await fetch(`${GAS_URL}?name=${
+                const response = await fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}`);
+                const data = await response.json();
+                updateDisplay(data.totalIn || 0, data.totalOut || 0, data.lastUpdate);
+                if(data.weekly) renderChart(data.weekly);
+            } catch (e) { console.error(e); }
+        }
+
+        // 3. Clinical Data Recording
+        async function addRecord() {
+            const amountInput = document.getElementById('fluid-amount');
+            const type = document.getElementById('fluid-type').value;
+            const btn = document.getElementById('submit-btn');
+            const val = parseInt(amountInput.value);
+
+            if(!val || val <= 0) return amountInput.classList.add('border-red-400');
+            amountInput.classList.remove('border-red-400');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-sync fa-spin"></i> Menghubungkan Cloud...`;
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: "SAVE_RECORD",
+                        name: localStorage.getItem('mira_name'),
+                        room: localStorage.getItem('mira_room'),
+                        fluidType: type === 'IN' ? 'Minum/Infus' : 'Urin',
+                        amount: val
+                    })
+                });
+                const result = await response.json();
+                updateDisplay(result.totalIn, result.totalOut, new Date().toISOString());
+                if(result.weekly) renderChart(result.weekly);
+                amountInput.value = '';
+                btn.innerHTML = `<i class="fas fa-check-circle"></i> Data Tersimpan`;
+                btn.classList.replace('mira-accent', 'bg-slate-700');
+                btn.classList.add('bg-emerald-600');
+            } catch (e) { 
+                btn.innerHTML = `Gagal Koneksi`;
+                btn.classList.replace('mira-accent', 'bg-rose-500');
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `Catat ke Rekam Medis Cloud`;
+                    btn.className = "w-full mira-accent text-white font-bold py-5 rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-[0.15em]";
+                }, 2000);
+            }
+        }
+
+        // 4. Clinical UI Render & Reminder
+        function updateDisplay(tin, tout, lastUpdate) {
+            const balance = tin - tout;
+            const percent = Math.min((tin / DAILY_LIMIT) * 100, 100);
+            document.getElementById('intake-display').innerText = tin + " ml";
+            document.getElementById('output-display').innerText = tout + " ml";
+            document.getElementById('balance-display').innerText = balance + " ml";
+            document.getElementById('percent-display').innerHTML = `${Math.round(percent)}<small class="text-xl text-slate-300">%</small>`;
+            document.getElementById('progress-bar').style.width = percent + '%';
+            
+            const alertTag = document.getElementById('hydration-alert');
+            if(lastUpdate) {
+                const diff = (new Date() - new Date(lastUpdate)) / (1000 * 60 * 60);
+                if(diff > 2) {
+                    alertTag.innerText = "⚠️ Belum ada asupan > 2 jam";
+                    alertTag.className = "text-[9px] font-bold text-rose-600 uppercase tracking-wider";
+                } else {
+                    alertTag.innerText = "💧 Hidrasi Optimal";
+                    alertTag.className = "text-[9px] font-bold text-slate-400 uppercase tracking-widest";
+                }
+            }
+            const tag = document.getElementById('status-tag');
+            tag.innerText = (percent >= 100) ? "KRITIS" : "SINKRON";
+            tag.className = (percent >= 100) ? "status-pill status-critical" : "status-pill status-normal";
+        }
+
+        // 5. Clinical Chart Render
+        function renderChart(history) {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.labels,
+                    datasets: [{
+                        data: history.values,
+                        borderColor: '#334155',
+                        backgroundColor: 'rgba(51, 65, 85, 0.03)',
+                        fill: true,
+                        tension: 0.2,
+                        borderWidth: 2,
+                        pointRadius: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { display: false }, 
+                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: '500' }, color: '#64748b' } } 
+                    }
+                }
+            });
+        }
+
+        function saveIdentity() {
+            const n = document.getElementById('input-name').value.trim();
+            const r = document.getElementById('input-room').value.trim();
+            if(n && r) {
+                localStorage.setItem('mira_name', n.toUpperCase());
+                localStorage.setItem('mira_room', r.toUpperCase());
+                location.reload();
+            }
+        }
+
+        function resetApp() { if(confirm("Hapus sesi klinis pasien?")) { localStorage.clear(); location.reload(); } }
+        document.addEventListener('DOMContentLoaded', syncWithCloud);
+    </script>
+</body>
+</html>
