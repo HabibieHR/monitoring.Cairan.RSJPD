@@ -85,46 +85,62 @@
             }
         }
 
-        async function addRecord() {
-            const amount = document.getElementById('fluid-amount').value;
-            const type = document.getElementById('fluid-type').value;
-            const btn = document.getElementById('btn-simpan');
+    async function addRecord() {
+    const amountInput = document.getElementById('fluid-amount');
+    const amount = amountInput.value;
+    const type = document.getElementById('fluid-type').value;
+    const btn = document.getElementById('btn-simpan');
 
-            if(!amount) return;
+    if(!amount || amount <= 0) return alert("Masukkan jumlah ml yang valid!");
 
-            btn.disabled = true;
-            btn.innerText = "Mengirim...";
+    btn.disabled = true;
+    btn.innerText = "Sedang Mengirim...";
 
-            const payload = {
-                nama: localStorage.getItem('pasien_nama'),
-                kamar: localStorage.getItem('pasien_kamar'),
-                jk: localStorage.getItem('pasien_jk'),
-                amount: amount,
-                type: type
-            };
+    // DATA PASIEN
+    const payload = {
+        nama: localStorage.getItem('pasien_nama'),
+        kamar: localStorage.getItem('pasien_kamar'),
+        jk: localStorage.getItem('pasien_jk'),
+        amount: amount,
+        type: type
+    };
 
-            try {
-                // Kirim ke Google Drive via Apps Script
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
+    // PENTING: Ganti link di bawah ini dengan URL Web App dari Google Apps Script kamu!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3rorMz_9deDLUeiW8dTQ_1fAMUmxYSI6JS-py85j9gbPCs3pxJkE9ZNT_EMzuxuXR/exec"; 
 
-                if(type === 'IN') {
-                    let currentIn = parseInt(localStorage.getItem('totalIn') || 0);
-                    localStorage.setItem('totalIn', currentIn + parseInt(amount));
-                }
-                
-                alert("Data Tersimpan di Drive!");
-                updateUI();
-            } catch (e) {
-                alert("Gagal kirim ke Drive, cek koneksi.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "SIMPAN & KIRIM KE DRIVE";
-                document.getElementById('fluid-amount').value = '';
-            }
+    try {
+        // Mengirim data ke Google Sheets
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Menghindari error pemblokiran browser (CORS)
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        // Update tampilan lokal di HP/Browser pasien
+        if(type === 'IN') {
+            let currentIn = parseInt(localStorage.getItem('totalIn') || 0);
+            localStorage.setItem('totalIn', currentIn + parseInt(amount));
+        } else {
+            let currentOut = parseInt(localStorage.getItem('totalOut') || 0);
+            localStorage.setItem('totalOut', currentOut + parseInt(amount));
         }
+        
+        localStorage.setItem('last_input_time', new Date().getTime());
+        
+        alert("Berhasil! Data telah tersimpan di Drive.");
+        updateUI();
+        amountInput.value = '';
+
+    } catch (e) {
+        console.error("Error:", e);
+        alert("Gagal kirim. Pastikan URL Apps Script sudah benar.");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "SIMPAN & KIRIM KE DRIVE";
+    }
+}
 
         function updateUI() {
             const totalIn = parseInt(localStorage.getItem('totalIn') || 0);
