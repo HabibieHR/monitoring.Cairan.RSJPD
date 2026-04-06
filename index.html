@@ -3,226 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Cairan - Premium Edition</title>
+    <title>Monitoring Cairan - AI Nurse Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .premium-shadow { box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
+        .premium-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+        .ai-chat-bubble { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 pb-12 flex items-center justify-center">
+<body class="bg-slate-100 min-h-screen p-4 pb-12 flex items-center justify-center">
 
-    <div class="max-w-md w-full glass rounded-[2.5rem] premium-shadow overflow-hidden border border-white">
+    <div class="max-w-md w-full glass rounded-[3rem] premium-shadow overflow-hidden border border-white relative">
         
-        <div id="setup-form" class="p-10 space-y-6">
-            <div class="text-center space-y-2">
-                <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
-                    <i class="fas fa-hospital-user text-3xl text-white"></i>
-                </div>
-                <h2 class="text-3xl font-extrabold text-slate-800">Registrasi</h2>
-                <p class="text-sm text-slate-500">Lengkapi data rekam medis pasien</p>
-            </div>
-            <div class="space-y-4">
-                <div class="relative">
-                    <i class="fas fa-user absolute left-4 top-4 text-slate-400"></i>
-                    <input id="input-nama" type="text" placeholder="Nama Pasien" class="w-full bg-slate-50 border-none p-4 pl-12 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                </div>
-                <div class="relative">
-                    <i class="fas fa-door-closed absolute left-4 top-4 text-slate-400"></i>
-                    <input id="input-kamar" type="text" placeholder="Nomor Kamar" class="w-full bg-slate-50 border-none p-4 pl-12 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                </div>
-                <div class="relative">
-                    <i class="fas fa-venus-mars absolute left-4 top-4 text-slate-400"></i>
-                    <select id="input-jk" class="w-full bg-slate-50 border-none p-4 pl-12 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none appearance-none shadow-sm font-medium text-slate-600">
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </div>
-            </div>
-            <button onclick="saveIdentity()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-3xl shadow-xl shadow-blue-200 transition-all active:scale-95 text-lg">
-                Mulai Monitoring
-            </button>
-        </div>
-
-        <div id="main-dashboard" class="hidden">
-            <div class="gradient-bg p-8 text-white relative">
+        <div id="main-dashboard">
+            <div class="bg-slate-900 p-8 text-white">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
-                        <span id="display-jk-tag" class="text-[10px] bg-blue-500 px-3 py-1 rounded-full font-bold uppercase tracking-widest"></span>
-                        <h2 id="display-nama" class="text-2xl font-black leading-tight"></h2>
-                        <p id="display-info" class="text-xs opacity-60 font-medium"></p>
+                        <span id="display-jk-tag" class="text-[10px] bg-blue-600 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Laki-laki</span>
+                        <h2 id="display-nama" class="text-2xl font-black leading-tight tracking-tight">Humaira</h2>
+                        <p id="display-info" class="text-xs opacity-50 font-medium italic italic">Kamar: 001</p>
                     </div>
-                    <button onclick="resetApp()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 transition-all">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
+                    <div class="flex gap-2">
+                         <div class="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                            <i class="fas fa-robot text-blue-400"></i>
+                         </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="p-8 -mt-6 glass rounded-t-[2.5rem] space-y-8">
+            <div class="p-8 -mt-8 glass rounded-t-[3rem] space-y-6">
                 
-                <div class="space-y-4">
-                    <div class="flex justify-between items-end">
-                        <h3 class="font-bold text-slate-800 text-lg italic">Status Harian</h3>
-                        <span id="status-percent" class="text-3xl font-black text-blue-600">0%</span>
+                <div id="ai-advice-container" class="ai-chat-bubble hidden bg-blue-600 p-5 rounded-[2rem] text-white shadow-lg shadow-blue-200 relative overflow-hidden">
+                    <div class="flex gap-3 items-start relative z-10">
+                        <div class="bg-white/20 p-2 rounded-xl">
+                            <i class="fas fa-comment-medical text-xl text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm">Saran Suster AI:</h4>
+                            <p id="ai-text" class="text-xs leading-relaxed opacity-90 mt-1 font-medium italic">Sedang menganalisa kondisi Anda...</p>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden shadow-inner">
-                        <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(59,130,246,0.5)]" style="width: 0%"></div>
+                    <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-white/10 rounded-full"></div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-end px-1">
+                        <h3 class="font-bold text-slate-800 text-sm">Status Input Harian</h3>
+                        <span id="status-percent" class="text-2xl font-black text-blue-600">0%</span>
                     </div>
-                    
-                    <div id="health-alert" class="hidden p-4 rounded-2xl flex items-start gap-3 border shadow-sm transition-all duration-500">
-                        <i id="alert-icon" class="fas fa-exclamation-triangle mt-1"></i>
-                        <p id="alert-text" class="text-xs font-semibold leading-relaxed"></p>
+                    <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner">
+                        <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-1000 ease-in-out shadow-[0_0_10px_rgba(37,99,235,0.4)]" style="width: 0%"></div>
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 space-y-5 relative overflow-hidden">
-                    <div class="flex items-center gap-4 relative z-10">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3588/3588621.png" alt="Nurse" class="w-14 h-14 object-contain">
-                        <div>
-                            <h4 class="font-black text-blue-900 text-base">Catat Cairan Baru</h4>
-                            <p class="text-[10px] text-blue-600 font-medium italic">Data tersimpan otomatis di Drive</p>
-                        </div>
+                <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3588/3588621.png" class="w-10 h-10" alt="Nurse">
+                        <p class="text-xs font-bold text-slate-700">Berapa ml asupan Anda sekarang?</p>
                     </div>
-                    
-                    <div class="flex gap-2 relative z-10">
-                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 bg-white border-none p-4 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-400 text-xl font-bold">
-                        <select id="fluid-type" class="bg-white border-none p-4 rounded-2xl font-bold shadow-sm appearance-none outline-none">
+                    <div class="flex gap-2">
+                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 bg-slate-50 border-none p-4 rounded-2xl shadow-inner outline-none focus:ring-2 focus:ring-blue-400 text-lg font-bold">
+                        <select id="fluid-type" class="bg-slate-50 border-none p-4 rounded-2xl font-bold shadow-inner outline-none appearance-none cursor-pointer">
                             <option value="IN">Minum</option>
                             <option value="OUT">Urin</option>
                         </select>
                     </div>
-                    <button id="btn-simpan" onclick="addRecord()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 relative z-10">
-                        <i class="fas fa-paper-plane"></i> Simpan & Kirim
+                    <button id="btn-simpan" onclick="addRecord()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i> SIMPAN DATA
                     </button>
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-100 rounded-full opacity-50"></div>
                 </div>
             </div>
 
-            <div class="px-10 pb-8 text-center text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
-                Medical Cloud Synchronized
+            <div class="px-10 pb-8 text-center text-slate-400 font-bold text-[9px] uppercase tracking-[0.3em]">
+                Integrated AI Medical Assistant
             </div>
         </div>
     </div>
 
     <script>
-        // URL SCRIPT ANDA YANG BARU
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG9e0tsti2INZDDcM-HPMO29nojxFxebmRUDz_rR_ZilbNBggWoDTKyc5yxJwMnPtV/exec";
-        const LIMIT_HARIAN = 1500; 
-
-        function saveIdentity() {
-            const nama = document.getElementById('input-nama').value;
-            const kamar = document.getElementById('input-kamar').value;
-            const jk = document.getElementById('input-jk').value;
-
-            if(!nama || !kamar) return alert("Mohon lengkapi Nama & Kamar!");
-
-            localStorage.setItem('pasien_nama', nama);
-            localStorage.setItem('pasien_kamar', kamar);
-            localStorage.setItem('pasien_jk', jk);
-            checkUser();
-        }
-
-        function checkUser() {
-            const nama = localStorage.getItem('pasien_nama');
-            if(nama) {
-                document.getElementById('setup-form').classList.add('hidden');
-                document.getElementById('main-dashboard').classList.remove('hidden');
-                document.getElementById('display-nama').innerText = nama;
-                document.getElementById('display-jk-tag').innerText = localStorage.getItem('pasien_jk');
-                document.getElementById('display-info').innerText = `Kamar: ${localStorage.getItem('pasien_kamar')}`;
-                updateUI();
-            }
-        }
+        const LIMIT = 1500;
 
         async function addRecord() {
             const amountInput = document.getElementById('fluid-amount');
-            const amount = amountInput.value;
+            const amount = parseInt(amountInput.value);
             const type = document.getElementById('fluid-type').value;
             const btn = document.getElementById('btn-simpan');
 
-            if(!amount || amount <= 0) return alert("Isi jumlah ml!");
+            if(!amount || amount <= 0) return alert("Masukkan jumlah ml!");
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Memproses...`;
-
-            const payload = {
-                nama: localStorage.getItem('pasien_nama'),
-                kamar: localStorage.getItem('pasien_kamar'),
-                jk: localStorage.getItem('pasien_jk'),
-                amount: amount,
-                type: type
-            };
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Suster AI sedang mencatat...`;
 
             try {
-                // KIRIM DATA KE GOOGLE DRIVE
-                await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload) 
-                });
+                // KIRIM DATA KE DRIVE
+                const payload = {
+                    nama: localStorage.getItem('pasien_nama') || "Humaira",
+                    kamar: localStorage.getItem('pasien_kamar') || "001",
+                    jk: localStorage.getItem('pasien_jk') || "Laki-laki",
+                    amount: amount,
+                    type: type
+                };
 
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+
+                // UPDATE LOKAL
                 if(type === 'IN') {
                     let currentIn = parseInt(localStorage.getItem('totalIn') || 0);
-                    localStorage.setItem('totalIn', currentIn + parseInt(amount));
+                    localStorage.setItem('totalIn', currentIn + amount);
                 }
-                
-                alert("Berhasil! Data telah tersimpan di Drive.");
-                updateUI();
+
+                // AKTIFKAN ANALISA AI
+                updateUI(amount, type);
                 amountInput.value = '';
+                
             } catch (e) {
-                alert("Kesalahan koneksi ke Drive.");
+                alert("Gagal sinkronisasi.");
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fas fa-paper-plane"></i> Simpan & Kirim`;
+                btn.innerHTML = `<i class="fas fa-check-circle"></i> SIMPAN DATA`;
             }
         }
 
-        function updateUI() {
+        function updateUI(lastAmount = 0, lastType = '') {
             const totalIn = parseInt(localStorage.getItem('totalIn') || 0);
-            const percent = Math.min((totalIn / LIMIT_HARIAN) * 100, 100);
+            const percent = Math.min((totalIn / LIMIT) * 100, 100);
             
-            const pb = document.getElementById('progress-bar');
-            const alertBox = document.getElementById('health-alert');
-            const alertText = document.getElementById('alert-text');
-            const alertIcon = document.getElementById('alert-icon');
-            
-            pb.style.width = percent + "%";
+            document.getElementById('progress-bar').style.width = percent + "%";
             document.getElementById('status-percent').innerText = Math.round(percent) + "%";
 
-            alertBox.classList.remove('hidden');
+            // LOGIKA AI AGENT (ANALISA MEDIS OTOMATIS)
+            const aiContainer = document.getElementById('ai-advice-container');
+            const aiText = document.getElementById('ai-text');
+            aiContainer.classList.remove('hidden');
 
-            if(percent >= 100) {
-                pb.className = "bg-red-600 h-full shadow-[0_0_15px_rgba(220,38,38,0.5)]";
-                alertBox.className = "p-4 rounded-2xl flex items-start gap-3 bg-red-50 border-red-100 text-red-700 transition-all";
-                alertIcon.className = "fas fa-skull-crossbones mt-1";
-                alertText.innerHTML = "<strong>BATAS TERCAPAI!</strong> Hentikan asupan cairan tambahan. Segera hubungi dokter jika sesak napas.";
-            } else if(percent >= 80) {
-                pb.className = "bg-orange-500 h-full shadow-[0_0_15px_rgba(249,115,22,0.5)]";
-                alertBox.className = "p-4 rounded-2xl flex items-start gap-3 bg-orange-50 border-orange-100 text-orange-700 transition-all";
-                alertIcon.className = "fas fa-exclamation-triangle mt-1";
-                alertText.innerHTML = "<strong>WASPADA!</strong> Anda sudah mencapai 80% kuota harian. Kurangi porsi minum.";
+            let advice = "";
+            
+            if (percent >= 100) {
+                advice = "STOP! Anda sudah mencapai batas maksimal 1500ml. Jika merasa sesak napas atau batuk saat berbaring, segera lapor ke perawat di kamar Anda.";
+            } else if (percent >= 80) {
+                advice = `Hati-hati, sisa kuota minum Anda tinggal ${LIMIT - totalIn}ml lagi. Gunakan gelas kecil dan hindari makanan asin agar tidak haus.`;
+            } else if (lastType === 'IN' && lastAmount > 300) {
+                advice = "Anda baru saja minum cukup banyak sekaligus. Untuk pasien gagal ginjal/jantung, sebaiknya minum sedikit-sedikit tapi sering agar jantung tidak terbebani.";
             } else {
-                pb.className = "bg-blue-600 h-full shadow-[0_0_15px_rgba(37,99,235,0.5)]";
-                alertBox.className = "p-4 rounded-2xl flex items-start gap-3 bg-emerald-50 border-emerald-100 text-emerald-700 transition-all";
-                alertIcon.className = "fas fa-check-circle mt-1";
-                alertText.innerHTML = "Kondisi asupan cairan saat ini masih dalam batas aman medis.";
+                advice = "Catatan berhasil disimpan. Pastikan urin Anda tetap terpantau dan catat setiap ada pengeluaran cairan ya.";
             }
+
+            aiText.innerText = advice;
         }
 
-        function resetApp() {
-            if(confirm("Hapus data identitas dan ganti pasien?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        checkUser();
+        // Jalankan UI saat load
+        updateUI();
     </script>
 </body>
 </html>
