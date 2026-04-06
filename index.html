@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health - Singapore Clinical Standard</title>
+    <title>Mira Health - Pemantauan Cairan Medis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -12,23 +12,29 @@
         .clinical-card { background: #ffffff; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
         .mira-accent { background: #4f46e5; }
         .status-pill { padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        
         .chat-bubble-mira { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px 20px 20px 0; color: #334155; }
         .chat-bubble-user { background: #4f46e5; color: white; border-radius: 20px 20px 0 20px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+        
         .chat-panel-animate { transition: transform 0.4s ease-out, opacity 0.4s ease-out; }
+        
         .pulse-soft { animation: pulse 2s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2); }
             50% { transform: scale(1.05); box-shadow: 0 4px 30px rgba(79, 70, 229, 0.4); }
             100% { transform: scale(1); box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2); }
         }
+        
         .pulse-red { animation: pulseRed 1s infinite; }
         @keyframes pulseRed {
             0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
             100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
         }
+
         .chat-container::-webkit-scrollbar { width: 5px; }
         .chat-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -48,7 +54,7 @@
                     <p id="patient-room" class="text-[11px] text-indigo-600 mt-1.5 font-bold uppercase tracking-wider"></p>
                 </div>
             </div>
-            <button onclick="resetApp()" class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-red-500 transition-all">
+            <button onclick="resetApp()" class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
@@ -56,7 +62,7 @@
         <div id="main-dashboard" class="hidden space-y-5 animate-fade relative z-20">
             <div class="clinical-card p-8 text-center space-y-6 relative overflow-hidden">
                 <div class="flex justify-between items-center relative z-10">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Fluid Balance Status</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Status Keseimbangan Cairan</span>
                     <span id="status-tag" class="status-pill bg-emerald-50 text-emerald-700">Normal</span>
                 </div>
                 <div class="relative flex items-center justify-center z-10">
@@ -66,62 +72,82 @@
                     <div id="progress-bar" class="mira-accent h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider relative z-10">
-                    <span>Intake: <span id="intake-display" class="text-indigo-600">0</span>ml</span>
-                    <span>Output: <span id="output-display" class="text-slate-900">0</span>ml</span>
+                    <span>Masuk: <span id="intake-display" class="text-indigo-600">0</span>ml</span>
+                    <span>Keluar: <span id="output-display" class="text-slate-900">0</span>ml</span>
                 </div>
+                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest relative z-10 border-t border-slate-100 pt-4 text-center w-full">Batas Medis Harian: 1500ml</p>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-50 rounded-full opacity-60"></div>
             </div>
 
             <div class="clinical-card p-7 space-y-5">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100">
+                        <i class="fas fa-file-medical text-sm"></i>
+                    </div>
+                    <h4 class="font-bold text-sm uppercase tracking-tight text-slate-950">Pembaruan Catatan Medis</h4>
+                </div>
                 <div class="flex gap-4">
                     <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Volume (ml)</label>
-                        <input id="fluid-amount" type="number" placeholder="e.g. 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-extrabold text-xl outline-none focus:border-indigo-400">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2 mb-1.5 block tracking-wide">Volume (ml)</label>
+                        <input id="fluid-amount" type="number" placeholder="Contoh: 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-extrabold text-xl outline-none focus:border-indigo-400 shadow-inner">
                     </div>
                     <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Type</label>
-                        <select id="fluid-type" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-bold text-sm outline-none cursor-pointer appearance-none text-slate-700">
-                            <option value="IN">Intake</option>
-                            <option value="OUT">Output</option>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2 mb-1.5 block tracking-wide">Jenis</label>
+                        <select id="fluid-type" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-bold text-sm outline-none cursor-pointer appearance-none shadow-inner text-slate-700">
+                            <option value="IN">Minum</option>
+                            <option value="OUT">Urin</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-[11px] uppercase tracking-widest">
-                    Submit Fluid Data
+                <button onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-all text-[11px] uppercase tracking-widest hover:bg-indigo-700">
+                    Simpan Data Cairan
                 </button>
             </div>
+            <div class="text-center pb-4"><p class="text-slate-400 font-bold text-[10px] uppercase tracking-[0.4em]">Sinkronisasi Awan Medis Aktif</p></div>
         </div>
 
         <div id="setup-form" class="clinical-card p-12 space-y-10 animate-fade relative z-40">
             <div class="text-center space-y-3">
-                <div class="w-24 h-24 mira-accent rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl text-white">
-                    <i class="fas fa-hospital-symbol text-4xl"></i>
+                <div class="w-24 h-24 mira-accent rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl shadow-indigo-200 overflow-hidden border-4 border-white text-white text-4xl">
+                    <i class="fas fa-hospital-symbol"></i>
                 </div>
                 <h2 class="text-3xl font-black tracking-tighter text-slate-950">MIRA HEALTH</h2>
+                <p class="text-xs text-slate-400 font-semibold uppercase tracking-widest bg-slate-100 px-4 py-1.5 rounded-full inline-block">Sistem Monitoring Pasien</p>
             </div>
             <div class="space-y-4">
-                <input id="input-name" type="text" placeholder="Patient Name" class="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-semibold">
-                <input id="input-room" type="text" placeholder="Ward / Room" class="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-semibold">
+                <input id="input-name" type="text" placeholder="Nama Lengkap Pasien" class="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-semibold text-sm focus:border-indigo-400">
+                <input id="input-room" type="text" placeholder="Nomor Kamar / Bangsal" class="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-semibold text-sm focus:border-indigo-400">
             </div>
-            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-6 rounded-2xl uppercase text-xs tracking-widest">Register Patient</button>
+            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-6 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                Daftar Pasien & Mulai <i class="fas fa-arrow-right ml-2"></i>
+            </button>
         </div>
 
-        <button onclick="toggleChat()" id="chat-fab" class="hidden fixed bottom-6 right-6 w-16 h-16 mira-accent text-white rounded-full shadow-2xl flex items-center justify-center z-50 overflow-hidden border-4 border-white pulse-soft">
+        <button onclick="toggleChat()" id="chat-fab" class="hidden fixed bottom-6 right-6 w-16 h-16 mira-accent text-white rounded-full shadow-2xl shadow-indigo-200 flex items-center justify-center transition-transform hover:scale-110 active:scale-90 z-50 overflow-hidden border-4 border-white pulse-soft">
             <i class="fas fa-robot text-2xl"></i>
         </button>
 
         <div id="chat-panel" class="hidden fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm p-4 flex items-end md:items-center justify-center">
-            <div id="chat-content" class="bg-white w-full max-w-md h-[80vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden chat-panel-animate translate-y-full opacity-0">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+            <div id="chat-content" class="bg-white w-full max-w-md h-[85vh] md:h-[75vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden chat-panel-animate translate-y-full opacity-0">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 mira-accent rounded-xl flex items-center justify-center text-white"><i class="fas fa-robot text-lg"></i></div>
-                        <h3 class="font-extrabold text-sm text-slate-950 uppercase">Mira.AI Agent</h3>
+                        <div class="w-12 h-12 mira-accent rounded-xl flex items-center justify-center text-white shadow-inner"><i class="fas fa-robot text-lg"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-sm tracking-tight text-slate-950 uppercase">Asisten Mira.AI</h3>
+                            <div class="flex items-center gap-1.5 mt-0.5"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span><p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest">Sistem Pintar Aktif</p></div>
+                        </div>
                     </div>
-                    <button onclick="toggleChat()" class="text-slate-300 hover:text-slate-500"><i class="fas fa-times text-xl"></i></button>
+                    <button onclick="toggleChat()" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-all"><i class="fas fa-times text-xl"></i></button>
                 </div>
-                <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-5 chat-container bg-slate-50/40"></div>
-                <div class="p-5 bg-white border-t border-slate-100 flex gap-3">
-                    <input id="chat-input" type="text" placeholder="Tanya Mira..." class="flex-1 bg-slate-50 p-5 rounded-2xl outline-none text-xs font-semibold focus:ring-2 focus:ring-indigo-100 border border-slate-100 transition-all">
-                    <button onclick="askMira()" class="w-14 h-14 mira-accent text-white rounded-2xl flex items-center justify-center active:scale-95 transition-all"><i class="fas fa-paper-plane"></i></button>
+                <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-5 chat-container bg-slate-50/40">
+                    <div class="flex justify-start items-start gap-3 animate-fade">
+                        <div class="w-8 h-8 rounded-lg mira-accent flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                        <div class="chat-bubble-mira p-4 text-[11px] font-bold leading-relaxed shadow-sm">Halo! Saya Mira.AI, asisten perawat pintar Anda. Bagaimana kondisi Anda hari ini? Saya siap membantu memantau asupan cairan Anda.</div>
+                    </div>
+                </div>
+                <div class="p-5 bg-white border-t border-slate-100 flex gap-3 sticky bottom-0 z-10">
+                    <input id="chat-input" type="text" placeholder="Tanya Mira apa saja..." class="flex-1 bg-slate-50 p-5 rounded-2xl outline-none text-xs font-semibold focus:ring-2 focus:ring-indigo-100 border border-slate-100 transition-all">
+                    <button onclick="askMira()" class="w-14 h-14 mira-accent text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all flex-shrink-0 hover:bg-indigo-700"><i class="fas fa-paper-plane text-xs"></i></button>
                 </div>
             </div>
         </div>
@@ -129,13 +155,13 @@
 
     <script>
         // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
-        const GAS_PROXY_URL = "https://script.google.com/macros/s/AKfycbwG9e0tsti2INZDDcM-HPMO29nojxFxebmRUDz_rR_ZilbNBggWoDTKyc5yxJwMnPtV/exec"; 
+        const GAS_PROXY_URL = "MASUKKAN_URL_WEB_APP_GAS_ANDA_DISINI"; 
         const LIMIT_HARIAN = 1500;
 
         function saveIdentity() {
             const name = document.getElementById('input-name').value;
             const room = document.getElementById('input-room').value;
-            if(!name || !room) return alert("Isi data!");
+            if(!name || !room) return alert("Mohon lengkapi data pasien!");
             localStorage.setItem('mira_name', name.toUpperCase());
             localStorage.setItem('mira_room', room.toUpperCase());
             localStorage.setItem('mira_total_in', 0);
@@ -151,7 +177,7 @@
                 document.getElementById('main-dashboard').classList.remove('hidden');
                 document.getElementById('chat-fab').classList.remove('hidden');
                 document.getElementById('patient-name').innerText = name;
-                document.getElementById('patient-room').innerText = `WARD/ROOM ${localStorage.getItem('mira_room')}`;
+                document.getElementById('patient-room').innerText = `KAMAR / BANGSAL ${localStorage.getItem('mira_room')}`;
                 updateUI();
             }
         }
@@ -168,11 +194,15 @@
             
             const tag = document.getElementById('status-tag');
             if(percentIn >= 100) {
-                tag.innerText = "CRITICAL LIMIT";
+                tag.innerText = "BATAS KRITIS";
                 tag.className = "status-pill bg-red-100 text-red-700 pulse-red";
                 progressBar.className = "bg-red-600 h-full rounded-full transition-all duration-1000";
+            } else if (percentIn >= 80) {
+                tag.innerText = "PERINGATAN";
+                tag.className = "status-pill bg-orange-100 text-orange-700";
+                progressBar.className = "mira-accent h-full rounded-full transition-all duration-1000";
             } else {
-                tag.innerText = "NORMAL STATUS";
+                tag.innerText = "STATUS AMAN";
                 tag.className = "status-pill bg-emerald-50 text-emerald-700";
                 progressBar.className = "mira-accent h-full rounded-full transition-all duration-1000";
             }
@@ -181,7 +211,7 @@
         function addRecord() {
             const val = parseInt(document.getElementById('fluid-amount').value);
             const type = document.getElementById('fluid-type').value;
-            if(!val || val <= 0) return alert("Jumlah ml tidak valid!");
+            if(!val || val <= 0) return alert("Jumlah volume tidak valid!");
             
             if(type === 'IN') {
                 let current = parseInt(localStorage.getItem('mira_total_in') || 0);
@@ -192,7 +222,7 @@
             }
             updateUI();
             document.getElementById('fluid-amount').value = '';
-            alert("Data Berhasil Disimpan!");
+            alert("Data Berhasil Diperbarui!");
         }
 
         function toggleChat() {
@@ -213,17 +243,17 @@
             const prompt = input.value;
             if(!prompt) return;
 
-            box.innerHTML += `<div class="flex justify-end animate-fade"><div class="chat-bubble-user p-4 text-xs font-semibold max-w-[80%]">${prompt}</div></div>`;
+            box.innerHTML += `<div class="flex justify-end animate-fade"><div class="chat-bubble-user p-4 text-xs font-semibold max-w-[80%] shadow-md leading-relaxed">${prompt}</div></div>`;
             input.value = "";
             box.scrollTop = box.scrollHeight;
 
             const typingId = "typing-" + Date.now();
-            box.innerHTML += `<div id="${typingId}" class="flex justify-start gap-3"><div class="w-8 h-8 rounded-lg mira-accent flex items-center justify-center text-white text-[10px] font-bold">M</div><div class="chat-bubble-mira p-4 text-[11px] font-bold italic text-slate-400 text-xs">Mira sedang menganalisis data...</div></div>`;
+            box.innerHTML += `<div id="${typingId}" class="flex justify-start gap-3"><div class="w-8 h-8 rounded-lg mira-accent flex flex-shrink-0 items-center justify-center text-white text-[10px] font-bold shadow-md">M</div><div class="chat-bubble-mira p-4 text-[11px] font-bold italic text-slate-400 text-xs">Mira sedang menganalisis data Anda...</div></div>`;
             box.scrollTop = box.scrollHeight;
 
             const name = localStorage.getItem('mira_name');
             const total = localStorage.getItem('mira_total_in');
-            const context = `Patient: ${name}, Fluid: ${total}ml / 1500ml limit.`;
+            const context = `Pasien: ${name}, Total Cairan: ${total}ml / batas 1500ml.`;
 
             try {
                 // KIRIM DATA KE GOOGLE APPS SCRIPT
@@ -233,29 +263,27 @@
                     body: JSON.stringify({ prompt, context })
                 });
 
-                // Simulasi respon karena no-cors
                 setTimeout(() => {
                     const typingEl = document.getElementById(typingId);
                     if(typingEl) typingEl.remove();
                     
-                    let reply = `Hai ${name}, saya Mira. Asupan Anda saat ini ${total}ml. Ada yang ingin Anda tanyakan lagi?`;
-                    if(prompt.toLowerCase().includes("status")) reply = `Status asupan Anda ${Math.round((total/1500)*100)}% dari batas harian. Tetap jaga hidrasi ya!`;
+                    let reply = `Halo ${name}, saya Mira. Saya memantau asupan cairan Anda yang saat ini berada di angka ${total}ml. Ada yang ingin dikonsultasikan?`;
+                    if(prompt.toLowerCase().includes("status")) reply = `Saat ini asupan cairan Anda mencapai ${Math.round((total/1500)*100)}% dari batas harian. Status Anda saat ini tergolong aman.`;
                     
-                    box.innerHTML += `<div class="flex justify-start gap-3 animate-fade"><div class="w-8 h-8 rounded-lg mira-accent flex items-center justify-center text-white text-[10px] font-bold">M</div><div class="chat-bubble-mira p-4 text-[11px] font-bold leading-relaxed shadow-sm">${reply}</div></div>`;
+                    box.innerHTML += `<div class="flex justify-start gap-3 animate-fade"><div class="w-8 h-8 rounded-lg mira-accent flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div><div class="chat-bubble-mira p-4 text-[11px] font-bold leading-relaxed shadow-sm">${reply}</div></div>`;
                     box.scrollTop = box.scrollHeight;
                 }, 1500);
             } catch (e) {
                 const typingEl = document.getElementById(typingId);
                 if(typingEl) typingEl.remove();
-                box.innerHTML += `<div class="text-[10px] text-red-400 text-center font-black">Connection Error.</div>`;
+                box.innerHTML += `<div class="text-[10px] text-red-400 text-center font-black">Gangguan koneksi ke server.</div>`;
             }
         }
 
-        function resetApp() { if(confirm("Logout?")) { localStorage.clear(); location.reload(); } }
+        function resetApp() { if(confirm("Apakah Anda yakin ingin keluar dan mengganti data pasien?")) { localStorage.clear(); location.reload(); } }
         
         document.addEventListener('DOMContentLoaded', checkUser);
         
-        // Memperbaiki Event Listener Enter
         document.getElementById('chat-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 askMira();
