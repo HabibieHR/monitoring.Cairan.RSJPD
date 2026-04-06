@@ -3,167 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Cairan Pasien</title>
+    <title>Monitoring Cairan - Drive Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen p-4 pb-20">
+<body class="bg-gray-100 min-h-screen p-4">
 
     <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
         
-        <div class="bg-slate-800 p-5 text-white">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h1 class="text-xl font-bold text-blue-400">Data Pasien</h1>
-                    <p class="text-xs opacity-70">Pemantauan Cairan Real-time</p>
+        <div id="setup-form" class="p-6 space-y-4">
+            <h2 class="text-xl font-bold text-gray-800 text-center">Registrasi Pasien</h2>
+            <input id="input-nama" type="text" placeholder="Nama Lengkap" class="w-full border p-3 rounded-lg">
+            <input id="input-kamar" type="text" placeholder="Nomor Kamar" class="w-full border p-3 rounded-lg">
+            <select id="input-jk" class="w-full border p-3 rounded-lg">
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+            </select>
+            <button onclick="saveIdentity()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">Mulai Monitoring</button>
+        </div>
+
+        <div id="main-dashboard" class="hidden">
+            <div class="bg-slate-800 p-5 text-white">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <p>Pasien: <span id="display-nama" class="font-bold"></span></p>
+                    <p>Kamar: <span id="display-kamar" class="font-bold"></span></p>
                 </div>
-                <button onclick="alert('Menu Lanjut Segera Hadir!')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs border border-slate-500">
-                    Menu Lanjut <i class="fas fa-chevron-right ml-1"></i>
-                </button>
+            </div>
+
+            <div class="p-6">
+                <div class="flex justify-between mb-2 text-sm font-medium">
+                    <span>Status Input Harian</span>
+                    <span id="status-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-6">
+                    <div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex gap-2">
+                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 border p-3 rounded-xl text-lg font-bold">
+                        <select id="fluid-type" class="border p-3 rounded-xl">
+                            <option value="IN">Minum</option>
+                            <option value="OUT">Urin</option>
+                        </select>
+                    </div>
+                    <button id="btn-simpan" onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">
+                        SIMPAN & KIRIM KE DRIVE
+                    </button>
+                </div>
             </div>
             
-            <div class="grid grid-cols-2 gap-3 text-sm">
-                <div class="bg-slate-700 p-2 rounded">
-                    <p class="text-[10px] uppercase text-slate-400">Nama Pasien</p>
-                    <p id="display-nama" class="font-semibold">Memuat...</p>
-                </div>
-                <div class="bg-slate-700 p-2 rounded">
-                    <p class="text-[10px] uppercase text-slate-400">No. Kamar</p>
-                    <p id="display-kamar" class="font-semibold text-yellow-400">Memuat...</p>
-                </div>
-                <div class="bg-slate-700 p-2 rounded col-span-2">
-                    <p class="text-[10px] uppercase text-slate-400">Jenis Kelamin</p>
-                    <p id="display-jk" class="font-semibold">Memuat...</p>
-                </div>
+            <div class="p-6 bg-gray-50 border-t">
+                <p class="text-xs text-gray-500 italic">Data akan otomatis tersimpan di Google Drive Dokter.</p>
             </div>
-        </div>
-
-        <div class="p-6">
-            <div class="flex justify-between mb-2">
-                <span class="text-gray-600 font-medium">Status Cairan Masuk</span>
-                <span id="status-percent" class="font-bold text-blue-600">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
-                <div id="progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 text-center">
-                <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-blue-700">
-                    <p class="text-[10px] uppercase font-bold">Total Masuk (IN)</p>
-                    <p id="total-in" class="text-xl font-black">0 ml</p>
-                </div>
-                <div class="bg-orange-50 border border-orange-100 p-3 rounded-lg text-orange-700">
-                    <p class="text-[10px] uppercase font-bold">Total Keluar (OUT)</p>
-                    <p id="total-out" class="text-xl font-black">0 ml</p>
-                </div>
-            </div>
-            <div id="warning-box" class="hidden mt-4 p-3 rounded-lg text-sm font-medium text-center"></div>
-        </div>
-
-        <div class="p-6 space-y-4 border-t border-gray-100">
-            <h3 class="font-bold text-gray-700 flex items-center"><i class="fas fa-plus-circle mr-2 text-blue-500"></i> Catat Cairan Baru</h3>
-            <div class="flex gap-2">
-                <input id="fluid-amount" type="number" placeholder="Jumlah ml" class="flex-1 border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 text-lg font-bold">
-                <select id="fluid-type" class="border p-3 rounded-xl bg-gray-50 font-semibold">
-                    <option value="IN">Minum</option>
-                    <option value="OUT">Urin</option>
-                </select>
-            </div>
-            <button onclick="addRecord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg active:transform active:scale-95 transition">
-                SIMPAN DATA
-            </button>
-        </div>
-
-        <div class="p-6 bg-gray-50 border-t">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-gray-700 text-sm italic">Riwayat Hari Ini:</h3>
-                <button onclick="resetData()" class="text-[10px] text-red-500 underline">Reset Data</button>
-            </div>
-            <ul id="history-list" class="text-xs text-gray-600 space-y-2"></ul>
         </div>
     </div>
 
     <script>
-        // Inisialisasi Data Identitas (Bisa diubah manual di sini atau lewat prompt nanti)
-        const dataPasien = {
-            nama: "Milady Project", // Ganti dengan nama pasien
-            kamar: "VVIP 201",
-            jk: "Laki-laki"
-        };
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3rorMz_9deDLUeiW8dTQ_1fAMUmxYSI6JS-py85j9gbPCs3pxJkE9ZNT_EMzuxuXR/exec"; // GANTI INI!
 
-        let totalIn = parseInt(localStorage.getItem('totalIn')) || 0;
-        let totalOut = parseInt(localStorage.getItem('totalOut')) || 0;
-        const limitHarian = 1500;
+        function saveIdentity() {
+            const nama = document.getElementById('input-nama').value;
+            const kamar = document.getElementById('input-kamar').value;
+            const jk = document.getElementById('input-jk').value;
 
-        // Tampilkan Identitas
-        document.getElementById('display-nama').innerText = dataPasien.nama;
-        document.getElementById('display-kamar').innerText = dataPasien.kamar;
-        document.getElementById('display-jk').innerText = dataPasien.jk;
+            if(!nama || !kamar) return alert("Mohon lengkapi data!");
 
-        if ("Notification" in window) { Notification.requestPermission(); }
+            localStorage.setItem('pasien_nama', nama);
+            localStorage.setItem('pasien_kamar', kamar);
+            localStorage.setItem('pasien_jk', jk);
+            checkUser();
+        }
 
-        function addRecord() {
-            const amount = parseInt(document.getElementById('fluid-amount').value);
+        function checkUser() {
+            const nama = localStorage.getItem('pasien_nama');
+            if(nama) {
+                document.getElementById('setup-form').classList.add('hidden');
+                document.getElementById('main-dashboard').classList.remove('hidden');
+                document.getElementById('display-nama').innerText = nama;
+                document.getElementById('display-kamar').innerText = localStorage.getItem('pasien_kamar');
+                updateUI();
+            }
+        }
+
+        async function addRecord() {
+            const amount = document.getElementById('fluid-amount').value;
             const type = document.getElementById('fluid-type').value;
+            const btn = document.getElementById('btn-simpan');
 
-            if (!amount || amount <= 0) return alert("Masukkan angka yang benar!");
+            if(!amount) return;
 
-            if (type === 'IN') totalIn += amount;
-            else totalOut += amount;
+            btn.disabled = true;
+            btn.innerText = "Mengirim...";
 
-            localStorage.setItem('totalIn', totalIn);
-            localStorage.setItem('totalOut', totalOut);
-            localStorage.setItem('last_input_time', new Date().getTime());
+            const payload = {
+                nama: localStorage.getItem('pasien_nama'),
+                kamar: localStorage.getItem('pasien_kamar'),
+                jk: localStorage.getItem('pasien_jk'),
+                amount: amount,
+                type: type
+            };
 
-            updateUI();
-            addToList(type, amount);
-            document.getElementById('fluid-amount').value = '';
+            try {
+                // Kirim ke Google Drive via Apps Script
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                if(type === 'IN') {
+                    let currentIn = parseInt(localStorage.getItem('totalIn') || 0);
+                    localStorage.setItem('totalIn', currentIn + parseInt(amount));
+                }
+                
+                alert("Data Tersimpan di Drive!");
+                updateUI();
+            } catch (e) {
+                alert("Gagal kirim ke Drive, cek koneksi.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "SIMPAN & KIRIM KE DRIVE";
+                document.getElementById('fluid-amount').value = '';
+            }
         }
 
         function updateUI() {
-            document.getElementById('total-in').innerText = totalIn + " ml";
-            document.getElementById('total-out').innerText = totalOut + " ml";
-
-            const percent = Math.min((totalIn / limitHarian) * 100, 100);
-            const progressBar = document.getElementById('progress-bar');
-            progressBar.style.width = percent + "%";
+            const totalIn = parseInt(localStorage.getItem('totalIn') || 0);
+            const limit = 1500;
+            const percent = Math.min((totalIn / limit) * 100, 100);
+            document.getElementById('progress-bar').style.width = percent + "%";
             document.getElementById('status-percent').innerText = Math.round(percent) + "%";
-
-            const warningBox = document.getElementById('warning-box');
-            warningBox.classList.remove('hidden');
-
-            if (totalIn > limitHarian) {
-                progressBar.className = "bg-red-600 h-4 rounded-full transition-all";
-                warningBox.innerText = "⚠️ BAHAYA! Cairan masuk melebihi batas " + limitHarian + "ml.";
-                warningBox.className = "mt-4 p-3 rounded-lg text-sm bg-red-100 text-red-700 font-bold border border-red-200";
-            } else if (totalIn >= limitHarian * 0.8) {
-                progressBar.className = "bg-yellow-500 h-4 rounded-full transition-all";
-                warningBox.innerText = "⚠️ WASPADA! Cairan hampir mencapai batas.";
-                warningBox.className = "mt-4 p-3 rounded-lg text-sm bg-yellow-100 text-yellow-700 font-bold border border-yellow-200";
-            } else {
-                progressBar.className = "bg-green-500 h-4 rounded-full transition-all";
-                warningBox.innerText = "✅ Kondisi Cairan Aman";
-                warningBox.className = "mt-4 p-3 rounded-lg text-sm bg-green-100 text-green-700 font-bold border border-green-200";
-            }
         }
 
-        function addToList(type, amount) {
-            const list = document.getElementById('history-list');
-            const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-            const li = document.createElement('li');
-            li.className = "flex justify-between border-b pb-1";
-            li.innerHTML = `<span>${time} - ${type === 'IN' ? 'Minum' : 'Urin'}</span> <span class="font-bold">${amount} ml</span>`;
-            list.prepend(li);
-        }
-
-        function resetData() {
-            if(confirm("Hapus semua data hari ini?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        updateUI();
+        checkUser();
     </script>
 </body>
 </html>
