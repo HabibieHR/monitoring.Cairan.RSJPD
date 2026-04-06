@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health Pro - Cloud Sync</title>
+    <title>Mira Health Pro - Clinical Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -13,45 +14,36 @@
         .mira-accent { background: #4f46e5; }
         .status-pill { padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
         .status-normal { background: #f0fdf4; color: #166534; }
-        .status-loading { background: #fefce8; color: #854d0e; }
+        .status-warning { background: #fffbeb; color: #92400e; }
         .status-critical { background: #fef2f2; color: #991b1b; animation: pulseRed 1.5s infinite; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
         
         @keyframes pulseRed {
             0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
         }
-        
-        .loader { border-top-color: #4f46e5; animation: spinner 0.6s linear infinite; }
-        @keyframes spinner { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen pb-10">
 
-    <div class="max-w-md w-full space-y-5 relative">
+    <div class="max-w-md mx-auto p-4 space-y-5">
         
-        <div id="display-profile" class="hidden clinical-card p-5 flex justify-between items-center animate-fade">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500">
-                    <i class="fas fa-user-circle text-2xl"></i>
-                </div>
+        <div id="display-profile" class="hidden clinical-card p-5 flex justify-between items-center sticky top-4 z-50 bg-white/80 backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 mira-accent rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">M</div>
                 <div>
-                    <h2 id="patient-name" class="font-extrabold text-lg leading-none text-slate-900 uppercase"></h2>
-                    <p id="patient-room" class="text-[10px] text-indigo-600 mt-1 font-bold tracking-widest uppercase"></p>
+                    <h2 id="patient-name" class="font-extrabold text-sm leading-none text-slate-900 uppercase tracking-tight"></h2>
+                    <p id="patient-room" class="text-[9px] text-indigo-600 mt-1 font-bold tracking-widest uppercase"></p>
                 </div>
             </div>
-            <button onclick="resetApp()" class="text-slate-300 hover:text-red-500 p-2 transition-colors">
-                <i class="fas fa-power-off"></i>
-            </button>
+            <button onclick="resetApp()" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-power-off"></i></button>
         </div>
 
-        <div id="main-dashboard" class="hidden space-y-5 animate-fade">
+        <div id="main-dashboard" class="hidden space-y-5">
+            
             <div class="clinical-card p-8 text-center space-y-6">
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Data Cloud Hari Ini</span>
-                    <span id="status-tag" class="status-pill status-loading">Sinkronisasi...</span>
+                    <span id="hydration-alert" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Memeriksa Data...</span>
+                    <span id="status-tag" class="status-pill status-normal">Sinkron</span>
                 </div>
                 
                 <div class="py-2">
@@ -63,25 +55,16 @@
                 </div>
                 
                 <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-50">
-                    <div>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Masuk</p>
-                        <p class="text-base font-black text-indigo-600"><span id="intake-display">0</span><small class="ml-0.5 text-[10px]">ml</small></p>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Keluar</p>
-                        <p class="text-base font-black text-slate-800"><span id="output-display">0</span><small class="ml-0.5 text-[10px]">ml</small></p>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Balance</p>
-                        <p id="balance-display" class="text-base font-black text-emerald-600">0<small class="ml-0.5 text-[10px]">ml</small></p>
-                    </div>
+                    <div><p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Masuk</p><p class="text-base font-black text-indigo-600" id="intake-display">0</p></div>
+                    <div><p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Keluar</p><p class="text-base font-black text-slate-800" id="output-display">0</p></div>
+                    <div><p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Balance</p><p class="text-base font-black text-emerald-600" id="balance-display">0</p></div>
                 </div>
             </div>
 
             <div class="clinical-card p-6 space-y-4">
                 <div class="flex gap-3">
                     <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1.5 block">Jumlah (ml)</label>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1.5 block">Volume (ml)</label>
                         <input id="fluid-amount" type="number" inputmode="numeric" placeholder="0" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-black text-2xl outline-none focus:ring-2 focus:ring-indigo-100 transition-all">
                     </div>
                     <div class="w-1/3">
@@ -92,160 +75,196 @@
                         </select>
                     </div>
                 </div>
-                <button id="submit-btn" onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-100 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest">
+                
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1.5 block">Catatan Medis (Opsional)</label>
+                    <input id="fluid-note" type="text" placeholder="Misal: Pusing, Urin keruh, dll" class="w-full bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-semibold outline-none focus:border-indigo-400">
+                </div>
+
+                <button id="submit-btn" onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-100 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest">
                     Catat ke Cloud
                 </button>
             </div>
+
+            <div class="clinical-card p-6 space-y-4">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Tren Asupan 7 Hari</h3>
+                <div class="h-48 w-full">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div id="setup-form" class="clinical-card p-10 space-y-8 animate-fade text-center">
+        <div id="setup-form" class="clinical-card p-10 space-y-8 text-center hidden">
             <div class="space-y-2">
                 <div class="w-16 h-16 mira-accent rounded-2xl flex items-center justify-center mx-auto text-white shadow-xl shadow-indigo-100">
-                    <i class="fas fa-notes-medical text-2xl"></i>
+                    <i class="fas fa-hospital-user text-2xl"></i>
                 </div>
-                <h2 class="text-2xl font-black tracking-tight text-slate-900">MIRA HEALTH</h2>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Cloud Patient Monitoring</p>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Mira Health</h2>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">Smart Recovery System</p>
             </div>
             <div class="space-y-3">
                 <input id="input-name" type="text" placeholder="Nama Lengkap Pasien" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl font-semibold outline-none focus:border-indigo-400">
                 <input id="input-room" type="text" placeholder="Nomor Kamar" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl font-semibold outline-none focus:border-indigo-400">
             </div>
-            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-5 rounded-xl shadow-lg uppercase text-xs tracking-widest">
-                Daftar & Hubungkan
-            </button>
+            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-5 rounded-xl shadow-lg uppercase text-xs tracking-widest">Hubungkan ke Cloud</button>
         </div>
     </div>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyilbUEyIqqcu-3q8uMZhD7wC7-1hIQf-355TBXC1HHO4FihCeBlgVE9m70hrQqK_lA/exec";
         const DAILY_LIMIT = 1500;
+        let myChart = null;
 
-        // 1. Sinkronisasi Awal dari Cloud
+        // 1. Sinkronisasi Data & Grafik
         async function syncWithCloud() {
             const name = localStorage.getItem('mira_name');
             const room = localStorage.getItem('mira_room');
-            if(!name || !room) return;
+            if(!name || !room) {
+                document.getElementById('setup-form').classList.remove('hidden');
+                return;
+            }
 
-            setLoading(true);
+            document.getElementById('display-profile').classList.remove('hidden');
+            document.getElementById('main-dashboard').classList.remove('hidden');
+            document.getElementById('patient-name').innerText = name;
+            document.getElementById('patient-room').innerText = `KAMAR ${room}`;
+
             try {
-                const response = await fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}`);
+                const response = await fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&action=get_data`);
                 const data = await response.json();
-                updateDisplay(data.totalIn || 0, data.totalOut || 0);
+                
+                updateDisplay(data.totalIn || 0, data.totalOut || 0, data.lastUpdate);
+                if(data.weekly) renderChart(data.weekly);
+                
             } catch (e) {
                 console.error("Sync Error:", e);
-                document.getElementById('status-tag').innerText = "⚠️ Offline";
-            } finally {
-                setLoading(false);
+                document.getElementById('status-tag').innerText = "OFFLINE";
             }
         }
 
-        // 2. Kirim Data Baru ke Cloud
+        // 2. Kirim Data & Catatan
         async function addRecord() {
             const amountInput = document.getElementById('fluid-amount');
-            const type = document.getElementById('fluid-type').value;
-            const amount = parseInt(amountInput.value);
+            const noteInput = document.getElementById('fluid-note');
             const btn = document.getElementById('submit-btn');
+            const amount = parseInt(amountInput.value);
 
             if(!amount || amount <= 0) return amountInput.classList.add('border-red-400');
-            amountInput.classList.remove('border-red-400');
-
-            const name = localStorage.getItem('mira_name');
-            const room = localStorage.getItem('mira_room');
-
+            
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Memproses...`;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Sinkronisasi...`;
+
+            const payload = {
+                type: "SAVE_RECORD",
+                name: localStorage.getItem('mira_name'),
+                room: localStorage.getItem('mira_room'),
+                fluidType: document.getElementById('fluid-type').value === 'IN' ? 'Minum/Infus' : 'Urin',
+                amount: amount,
+                note: noteInput.value || ""
+            };
 
             try {
-                // Gunakan mode: 'cors' jika script Anda sudah mengizinkan, 
-                // jika tidak, hasil .json() mungkin gagal di beberapa browser (opaque).
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        type: "SAVE_RECORD",
-                        name: name,
-                        room: room,
-                        fluidType: type === 'IN' ? 'Minum/Infus' : 'Urin',
-                        amount: amount
-                    })
-                });
-                
+                const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
-                updateDisplay(result.totalIn, result.totalOut);
+                
+                updateDisplay(result.totalIn, result.totalOut, new Date().toISOString());
+                if(result.weekly) renderChart(result.weekly);
                 
                 amountInput.value = '';
+                noteInput.value = '';
                 btn.innerHTML = `<i class="fas fa-check-circle"></i> Berhasil!`;
-                btn.classList.replace('mira-accent', 'bg-emerald-500');
             } catch (e) {
-                console.error("Upload Error:", e);
-                btn.innerHTML = `<i class="fas fa-times-circle"></i> Gagal Cloud`;
-                btn.classList.replace('mira-accent', 'bg-rose-500');
+                btn.innerHTML = `<i class="fas fa-times-circle"></i> Gagal`;
             } finally {
                 setTimeout(() => {
                     btn.disabled = false;
                     btn.innerHTML = `Catat ke Cloud`;
-                    btn.className = "w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-3";
-                }, 2500);
+                }, 2000);
             }
         }
 
-        // 3. Update Visual Dashboard
-        function updateDisplay(tin, tout) {
+        // 3. UI Update + Fitur Smart Reminder
+        function updateDisplay(tin, tout, lastUpdate) {
             const balance = tin - tout;
             const percent = Math.min((tin / DAILY_LIMIT) * 100, 100);
 
-            document.getElementById('intake-display').innerText = tin.toLocaleString('id-ID');
-            document.getElementById('output-display').innerText = tout.toLocaleString('id-ID');
-            document.getElementById('balance-display').innerText = `${balance.toLocaleString('id-ID')}ml`;
+            document.getElementById('intake-display').innerText = tin + " ml";
+            document.getElementById('output-display').innerText = tout + " ml";
+            document.getElementById('balance-display').innerText = balance + " ml";
             document.getElementById('percent-display').innerHTML = `${Math.round(percent)}<small class="text-2xl text-slate-300">%</small>`;
             
             const pb = document.getElementById('progress-bar');
             pb.style.width = percent + '%';
             
+            // Logika Smart Reminder
+            const alertTag = document.getElementById('hydration-alert');
+            if(lastUpdate) {
+                const last = new Date(lastUpdate);
+                const diffHr = (new Date() - last) / (1000 * 60 * 60);
+                if(diffHr > 2) {
+                    alertTag.innerText = "⚠️ Belum minum > 2 jam";
+                    alertTag.className = "text-[10px] font-black text-rose-500 uppercase tracking-widest";
+                } else {
+                    alertTag.innerText = "💧 Hidrasi Terjaga";
+                    alertTag.className = "text-[10px] font-bold text-emerald-500 uppercase tracking-widest";
+                }
+            }
+
             const tag = document.getElementById('status-tag');
             if(percent >= 100) {
-                tag.innerText = "🚨 Batas Tercapai";
-                tag.className = "status-pill status-critical";
+                tag.innerText = "KRITIS"; tag.className = "status-pill status-critical";
                 pb.className = "bg-rose-600 h-full transition-all duration-1000";
             } else {
-                tag.innerText = "✅ Sinkron";
-                tag.className = "status-pill status-normal";
+                tag.innerText = "SINKRON"; tag.className = "status-pill status-normal";
                 pb.className = "mira-accent h-full transition-all duration-1000";
             }
         }
 
-        // --- Helper ---
-        function setLoading(state) {
-            const tag = document.getElementById('status-tag');
-            if(state) {
-                tag.innerText = "🔄 Sinkron...";
-                tag.className = "status-pill status-loading";
-            }
+        // 4. Render Grafik Tren
+        function renderChart(history) {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.labels, // Contoh: ['Sen', 'Sel', 'Rab'...]
+                    datasets: [{
+                        label: 'Asupan (ml)',
+                        data: history.values,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { display: false }, ticks: { display: false } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }
+                    }
+                }
+            });
         }
 
         function saveIdentity() {
             const n = document.getElementById('input-name').value.trim();
             const r = document.getElementById('input-room').value.trim();
-            if(!n || !r) return alert("Isi data lengkap!");
-            localStorage.setItem('mira_name', n.toUpperCase());
-            localStorage.setItem('mira_room', r.toUpperCase());
-            location.reload();
-        }
-
-        function checkUser() {
-            const name = localStorage.getItem('mira_name');
-            if(name) {
-                document.getElementById('setup-form').classList.add('hidden');
-                document.getElementById('display-profile').classList.remove('hidden');
-                document.getElementById('main-dashboard').classList.remove('hidden');
-                document.getElementById('patient-name').innerText = name;
-                document.getElementById('patient-room').innerText = `KAMAR ${localStorage.getItem('mira_room')}`;
-                syncWithCloud();
+            if(n && r) {
+                localStorage.setItem('mira_name', n.toUpperCase());
+                localStorage.setItem('mira_room', r.toUpperCase());
+                location.reload();
             }
         }
 
-        function resetApp() { if(confirm("Hapus sesi dan keluar?")) { localStorage.clear(); location.reload(); } }
+        function resetApp() { if(confirm("Hapus data lokal?")) { localStorage.clear(); location.reload(); } }
 
-        document.addEventListener('DOMContentLoaded', checkUser);
+        document.addEventListener('DOMContentLoaded', syncWithCloud);
     </script>
 </body>
 </html>
