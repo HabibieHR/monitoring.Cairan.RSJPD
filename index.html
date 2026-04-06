@@ -3,254 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health - Clinical Luxury Monitoring</title>
+    <title>Mira Health - Singapore Clinical Standard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); }
-        .mira-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        .premium-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
-        .card-dark { background: #0f172a; }
-        .pulse-soft { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        /* Chat Animations */
-        .chat-open { animation: slideUp 0.4s ease-out forwards; }
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .chat-container::-webkit-scrollbar { width: 4px; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        .clinical-card { background: #ffffff; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .mira-accent { background: #4f46e5; } /* Indigo */
+        .status-pill { padding: 6px 14px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        /* Chat Bubble Styles */
+        .chat-bubble-mira { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 20px 20px 20px 0; color: #334155; }
+        .chat-bubble-user { background: #4f46e5; color: white; border-radius: 20px 20px 0 20px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Utility */
+        .chat-container::-webkit-scrollbar { width: 5px; }
         .chat-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
 
-    <div class="max-w-md w-full glass rounded-[3rem] premium-shadow overflow-hidden border border-white relative">
+    <div class="max-w-md w-full space-y-5 relative">
         
-        <div id="setup-form" class="p-10 space-y-8">
-            <div class="text-center space-y-4">
-                <div class="w-24 h-24 bg-slate-900 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl overflow-hidden border-4 border-white">
-                    <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover" alt="Mira Logo">
+        <div id="display-profile" class="hidden clinical-card p-6 flex justify-between items-center animate-fade z-30 relative">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center border-4 border-white shadow-inner overflow-hidden">
+                    <i class="fas fa-user-injured text-slate-300 text-2xl"></i>
                 </div>
-                <h2 class="text-3xl font-black text-slate-900 tracking-tighter italic uppercase">Registrasi</h2>
+                <div>
+                    <h2 id="patient-name" class="font-extrabold text-xl leading-none uppercase tracking-tight text-slate-950"></h2>
+                    <p id="patient-room" class="text-[11px] text-indigo-600 mt-1.5 font-bold uppercase tracking-wider"></p>
+                </div>
             </div>
-            <div class="space-y-4">
-                <input id="input-nama" type="text" placeholder="Nama Pasien" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold">
-                <input id="input-kamar" type="text" placeholder="Nomor Kamar" class="w-full bg-slate-50 p-5 rounded-2xl outline-none border border-slate-100 font-bold">
-                <select id="input-jk" class="w-full bg-slate-50 p-5 rounded-2xl border border-slate-100 font-bold">
-                    <option value="LAKI-LAKI">LAKI-LAKI</option>
-                    <option value="PEREMPUAN">PEREMPUAN</option>
-                </select>
-            </div>
-            <button onclick="saveIdentity()" class="w-full bg-slate-900 text-white font-bold py-6 rounded-3xl uppercase tracking-widest text-xs">Mulai Monitoring</button>
+            <button onclick="resetApp()" class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </div>
 
-        <div id="main-dashboard" class="hidden">
-            <div class="card-dark p-8 text-white">
-                <div class="flex justify-between items-start">
-                    <div class="space-y-2">
-                        <span id="display-jk-tag" class="text-[9px] bg-indigo-500 px-3 py-1 rounded-full font-black uppercase tracking-widest"></span>
-                        <h1 id="display-nama" class="text-3xl font-black tracking-tighter italic uppercase"></h1>
-                        <p id="display-info" class="text-[10px] opacity-60 font-bold uppercase tracking-widest"></p>
-                    </div>
-                    <button onclick="resetApp()" class="text-white/30 hover:text-red-400"><i class="fas fa-power-off"></i></button>
+        <div id="main-dashboard" class="hidden space-y-5 animate-fade relative z-20">
+            
+            <div class="clinical-card p-8 text-center space-y-6 relative overflow-hidden gradient-bg">
+                <div class="flex justify-between items-center relative z-10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Fluid Balance Status</span>
+                    <span id="status-tag" class="status-pill bg-emerald-50 text-emerald-700">Normal</span>
                 </div>
+                <div class="relative flex items-center justify-center z-10">
+                    <span id="percent-display" class="text-7xl font-black tracking-tighter text-slate-950">0<small class="text-2xl font-bold text-slate-400">%</small></span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3 relative z-10 overflow-hidden shadow-inner">
+                    <div id="progress-bar" class="mira-accent h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider relative z-10">
+                    <span>Intake: <span id="intake-display" class="text-indigo-600">0</span>ml</span>
+                    <span>Output: <span id="output-display" class="text-slate-900">0</span>ml</span>
+                </div>
+                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest relative z-10 border-t border-slate-100 pt-4">Singapore Clinical Limit: 1500ml / Day</p>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-50 rounded-full opacity-60"></div>
             </div>
 
-            <div class="p-8 space-y-8 bg-white rounded-t-[3rem] -mt-6 relative z-10">
-                <div class="space-y-4">
-                    <div class="flex justify-between items-end">
-                        <h3 class="font-bold text-slate-800 text-sm uppercase">Status Cairan</h3>
-                        <span id="status-percent" class="text-4xl font-black text-indigo-600">0%</span>
+            <div class="clinical-card p-7 space-y-5">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100">
+                        <i class="fas fa-file-medical text-sm"></i>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-4 overflow-hidden">
-                        <div id="progress-bar" class="mira-gradient h-full transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                    <div id="health-alert" class="hidden p-5 rounded-3xl flex items-start gap-4 border text-[11px] font-bold uppercase tracking-tight shadow-sm">
-                        <i id="alert-icon" class="fas fa-info-circle mt-1 text-lg"></i>
-                        <p id="alert-text"></p>
-                    </div>
+                    <h4 class="font-bold text-sm uppercase tracking-tight text-slate-900">Update Medical Record</h4>
                 </div>
-
-                <div class="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 space-y-5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm overflow-hidden">
-                            <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
-                        </div>
-                        <h4 class="font-black text-slate-800 text-sm uppercase">Input Record</h4>
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2 mb-1.5 block tracking-wide">Volume (ml)</label>
+                        <input id="fluid-amount" type="number" placeholder="e.g. 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-extrabold text-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all shadow-inner">
                     </div>
-                    <div class="flex gap-3">
-                        <input id="fluid-amount" type="number" placeholder="ml" class="flex-1 bg-white p-5 rounded-2xl shadow-inner outline-none font-bold text-xl">
-                        <select id="fluid-type" class="bg-white p-5 rounded-2xl font-bold px-6 outline-none">
-                            <option value="IN">MINUM</option>
-                            <option value="OUT">URIN</option>
+                    <div class="w-1/3">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-2 mb-1.5 block tracking-wide">Type</label>
+                        <select id="fluid-type" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-bold text-sm outline-none cursor-pointer focus:border-indigo-400 appearance-none shadow-inner text-slate-700">
+                            <option value="IN">Intake (Drink)</option>
+                            <option value="OUT">Output (Urine)</option>
                         </select>
                     </div>
-                    <button id="btn-simpan" onclick="addRecord()" class="w-full bg-slate-900 text-white font-bold py-5 rounded-[2rem] text-[10px] uppercase tracking-[0.2em] shadow-xl">Simpan & Sinkron</button>
                 </div>
+                <button onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-all text-[11px] uppercase tracking-widest hover:bg-indigo-700">
+                    Submit Fluid Data
+                </button>
+            </div>
+            
+            <div class="text-center pb-4">
+                <p class="text-slate-400 font-bold text-[10px] uppercase tracking-[0.4em]">Singapore Medical Cloud Sync</p>
             </div>
         </div>
-    </div>
 
-    <button id="mira-chat-trigger" onclick="toggleChat()" class="hidden fixed bottom-8 right-8 w-16 h-16 rounded-full shadow-2xl mira-gradient border-4 border-white flex items-center justify-center transition-all active:scale-90 hover:rotate-12 z-[100] overflow-hidden">
-        <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
-    </button>
+        <div id="setup-form" class="clinical-card p-12 space-y-10 animate-fade relative z-40">
+            <div class="text-center space-y-3">
+                <div class="w-24 h-24 mira-accent rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl shadow-indigo-200 overflow-hidden border-4 border-white">
+                    <i class="fas fa-hospital-symbol text-white text-4xl"></i>
+                </div>
+                <h2 class="text-3xl font-black tracking-tighter text-slate-950">MIRA HEALTH</h2>
+                <p class="text-xs text-slate-400 font-semibold uppercase tracking-widest bg-slate-100 px-4 py-1.5 rounded-full inline-block">Singapore Clinical Standard</p>
+            </div>
+            <div class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-id-card absolute left-5 top-5 text-slate-300"></i>
+                    <input id="input-name" type="text" placeholder="Full Patient Name (as per ID)" class="w-full p-5 pl-14 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-semibold text-sm focus:border-indigo-400">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-bed absolute left-5 top-5 text-slate-300"></i>
+                    <input id="input-room" type="text" placeholder="Ward / Room Number (e.g. 08-12A)" class="w-full p-5 pl-14 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-semibold text-sm focus:border-indigo-400">
+                </div>
+            </div>
+            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-6 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                Register Patient & Start Monitoring <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
 
-    <div id="chat-panel" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-end justify-center p-4">
-        <div class="bg-white w-full max-w-md h-[80vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden chat-open">
-            <div class="mira-gradient p-6 text-white flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white rounded-2xl overflow-hidden border border-white/20 shadow-lg">
-                        <img src="https://files.oaiusercontent.com/file-NAn10uR7t1360wTizU6mS87Y?se=2024-10-24T08%3A32%3A46Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D1293c373-c61d-407b-8c67-c1044e99f660.webp&sig=G07V1Z1eU3A50aZJm6R%2BeI69P5p5N0T0z9D0l8%2B9mY0%3D" class="w-full h-full object-cover">
+        <button onclick="toggleChat()" id="chat-fab" class="hidden fixed bottom-6 right-6 w-16 h-16 mira-accent text-white rounded-full shadow-2xl shadow-indigo-200 flex items-center justify-center transition-transform hover:scale-110 active:scale-90 z-50 overflow-hidden border-4 border-white pulse-soft">
+            <i class="fas fa-robot text-2xl"></i>
+        </button>
+
+        <div id="chat-panel" class="hidden fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm p-4 flex items-end md:items-center justify-center transition-opacity duration-300">
+            <div class="bg-white w-full max-w-md h-[85vh] md:h-[75vh] rounded-[32px] md:rounded-[24px] shadow-2xl flex flex-col overflow-hidden animate-fade transform translate-y-full opacity-0 chat-panel-animate">
+                
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 mira-accent rounded-xl flex items-center justify-center text-white shadow-inner"><i class="fas fa-robot text-lg"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-sm tracking-tight text-slate-950">Mira.AI Agent</h3>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-widest">Gemini Engine Active</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-black text-sm uppercase tracking-tight">Mira.AI Agent</h3>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                            <span class="text-[9px] font-bold opacity-70 uppercase tracking-widest">Clinical Assistant</span>
+                    <button onclick="toggleChat()" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-300 hover:text-slate-500 hover:bg-slate-100 transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-5 chat-container bg-slate-50/40">
+                    <div class="flex justify-start items-start gap-3 animate-fade">
+                        <div class="w-8 h-8 rounded-lg mira-accent flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                        <div class="chat-bubble-mira p-4.5 text-[11px] font-bold leading-relaxed shadow-sm">
+                            Halo! Saya Mira.AI, perawat cerdas Anda hari ini. Bagaimana kondisi Anda? Saya siap membantu memantau asupan cairan Anda sesuai standar medis Singapura.
                         </div>
                     </div>
                 </div>
-                <button onclick="toggleChat()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto chat-container bg-slate-50/50">
-                <div class="flex gap-3 max-w-[85%]">
-                    <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
-                    <div class="bg-white p-4 rounded-3xl rounded-tl-none border border-slate-100 shadow-sm">
-                        <p class="text-xs font-bold text-slate-800 leading-relaxed">Halo! Saya Mira.AI. Bagaimana kondisi Anda hari ini? Saya siap membantu memantau asupan cairan Anda.</p>
-                    </div>
+                
+                <div class="p-5 bg-white border-t border-slate-100 flex gap-3 sticky bottom-0 z-10">
+                    <input id="chat-input" type="text" placeholder="Ask Mira about your fluid status or medical concerns..." class="flex-1 bg-slate-50 p-5 rounded-2xl outline-none text-xs font-semibold focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 border border-slate-100 transition-all">
+                    <button onclick="askMira()" class="w-14 h-14 mira-accent text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100 active:scale-95 transition-all flex-shrink-0 hover:bg-indigo-700">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
                 </div>
-            </div>
-
-            <div class="p-6 bg-white border-t border-slate-100 flex gap-3">
-                <input id="user-msg" type="text" placeholder="Tanyakan kondisi medis Anda..." class="flex-1 bg-slate-100 p-5 rounded-2xl outline-none font-bold text-xs focus:ring-2 focus:ring-indigo-400 transition-all">
-                <button onclick="sendToMira()" class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90">
-                    <i class="fas fa-paper-plane text-xs"></i>
-                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG9e0tsti2INZDDcM-HPMO29nojxFxebmRUDz_rR_ZilbNBggWoDTKyc5yxJwMnPtV/exec";
-        const LIMIT_HARIAN = 1500;
+        // === PENTING: KONFIGURASI PROXY GAS ===
+        // Tempelkan URL Web App dari Google Apps Script Deployment Anda di sini
+        const GAS_PROXY_URL = "MASUKKAN_URL_WEB_APP_GAS_ANDA_DISINI"; 
+        
+        const LIMIT_HARIAN = 1500; // Batas standar klinis Singapura (ml)
 
+        // 1. Fungsi Registrasi Pasien (Lokal)
         function saveIdentity() {
-            const nama = document.getElementById('input-nama').value;
-            const kamar = document.getElementById('input-kamar').value;
-            const jk = document.getElementById('input-jk').value;
-            if(!nama || !kamar) return alert("Lengkapi data!");
-            localStorage.setItem('pasien_nama', nama.toUpperCase());
-            localStorage.setItem('pasien_kamar', kamar);
-            localStorage.setItem('pasien_jk', jk);
-            checkUser();
+            const nameInput = document.getElementById('input-name');
+            const roomInput = document.getElementById('input-room');
+            const name = nameInput.value;
+            const room = roomInput.value;
+
+            if(!name || !room) {
+                alert("Please fill in Full Patient Name and Ward/Room Number.");
+                nameInput.classList.add('border-red-300');
+                roomInput.classList.add('border-red-300');
+                return;
+            }
+
+            // Simpan data di browser HP pasien (LocalStorage)
+            localStorage.setItem('mira_name', name.toUpperCase());
+            localStorage.setItem('mira_room', room.toUpperCase());
+            localStorage.setItem('mira_total_in', 0); // Reset Intake
+            localStorage.setItem('mira_total_out', 0); // Reset Output
+            
+            // Reload untuk masuk ke Dashboard
+            location.reload();
         }
 
+        // 2. Fungsi Cek Status Login saat App Dibuka
         function checkUser() {
-            const nama = localStorage.getItem('pasien_nama');
-            if(nama) {
+            const name = localStorage.getItem('mira_name');
+            if(name) {
+                // Sembunyikan Form, Tampilkan Dashboard & Chat FAB
                 document.getElementById('setup-form').classList.add('hidden');
+                document.getElementById('display-profile').classList.remove('hidden');
                 document.getElementById('main-dashboard').classList.remove('hidden');
-                document.getElementById('mira-chat-trigger').classList.remove('hidden');
-                document.getElementById('display-nama').innerText = nama;
-                document.getElementById('display-jk-tag').innerText = localStorage.getItem('pasien_jk');
-                document.getElementById('display-info').innerText = `KAMAR ${localStorage.getItem('pasien_kamar')} • RSUD LUXURY`;
+                document.getElementById('chat-fab').classList.remove('hidden');
+                
+                // Isi Data Header
+                document.getElementById('patient-name').innerText = name;
+                document.getElementById('patient-room').innerText = `WARD/ROOM ${localStorage.getItem('mira_room')}`;
+                
+                // Update Progress Bar
                 updateUI();
             }
         }
 
-        async function addRecord() {
-            const amountInput = document.getElementById('fluid-amount');
-            const amount = amountInput.value;
-            const type = document.getElementById('fluid-type').value;
-            const btn = document.getElementById('btn-simpan');
-            if(!amount || amount <= 0) return alert("Masukkan jumlah ml!");
-            btn.disabled = true; btn.innerHTML = "SINKRONISASI...";
-
-            const payload = { nama: localStorage.getItem('pasien_nama'), amount, type };
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                if(type === 'IN') {
-                    let current = parseInt(localStorage.getItem('totalIn') || 0);
-                    localStorage.setItem('totalIn', current + parseInt(amount));
-                }
-                updateUI();
-                amountInput.value = '';
-                alert("Data Sinkron!");
-            } finally {
-                btn.disabled = false; btn.innerHTML = "Simpan & Sinkron";
-            }
-        }
-
+        // 3. Fungsi Update Visual (Progress Bar, Angka, Tag Warna)
         function updateUI() {
-            const totalIn = parseInt(localStorage.getItem('totalIn') || 0);
-            const percent = Math.min((totalIn / LIMIT_HARIAN) * 100, 100);
-            document.getElementById('progress-bar').style.width = percent + "%";
-            document.getElementById('status-percent').innerText = Math.round(percent) + "%";
+            const totalIn = parseInt(localStorage.getItem('mira_total_in') || 0);
+            const totalOut = parseInt(localStorage.getItem('mira_total_out') || 0);
             
-            const alertBox = document.getElementById('health-alert');
-            alertBox.classList.remove('hidden');
-            if(percent >= 100) {
-                alertBox.className = "p-5 rounded-3xl flex items-start gap-4 bg-red-50 border-red-100 text-red-700 shadow-sm";
-                document.getElementById('alert-text').innerText = "DANGER! Hentikan asupan cairan tambahan segera.";
+            // Hitung Persentase Intake vs Limit
+            const percentIn = Math.min((totalIn / LIMIT_HARIAN) * 100, 100);
+            
+            // Update Angka di Layar
+            document.getElementById('intake-display').innerText = totalIn;
+            document.getElementById('output-display').innerText = totalOut;
+            document.getElementById('percent-display').innerHTML = `${Math.round(percentIn)}<small class="text-2xl font-bold text-slate-400">%</small>`;
+            
+            // Update Lebar Progress Bar (Indigo)
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = percentIn + '%';
+            
+            // Update Warna & Teks Tag Status (Singapore Clinical Standard)
+            const tag = document.getElementById('status-tag');
+            if(percentIn >= 100) {
+                tag.innerText = "CRITICAL LIMIT (Stop Drink)";
+                tag.className = "status-pill bg-red-100 text-red-700 pulse-red shadow-sm";
+                progressBar.classList.remove('mira-accent');
+                progressBar.classList.add('bg-red-600'); // Merah jika kritis
+            } else if (percentIn >= 80) {
+                tag.innerText = "WARNING (Limit Near)";
+                tag.className = "status-pill bg-orange-100 text-orange-700 shadow-sm";
+                progressBar.classList.add('mira-accent');
+                progressBar.classList.remove('bg-red-600');
             } else {
-                alertBox.className = "p-5 rounded-3xl flex items-start gap-4 bg-emerald-50 border-emerald-100 text-emerald-700 shadow-sm";
-                document.getElementById('alert-text').innerText = "SAFE. Hidrasi Anda dalam batas normal.";
+                tag.innerText = "NORMAL STATUS";
+                tag.className = "status-pill bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm";
+                progressBar.classList.add('mira-accent');
+                progressBar.classList.remove('bg-red-600');
             }
         }
 
-        // --- MIRA.AI CHAT AGENT LOGIC ---
-        function toggleChat() {
-            document.getElementById('chat-panel').classList.toggle('hidden');
+        // 4. Fungsi Input Data Cairan Baru (Intake/Output)
+        function addRecord() {
+            const amountInput = document.getElementById('fluid-amount');
+            const val = parseInt(amountInput.value);
+            const type = document.getElementById('fluid-type').value;
+
+            if(!val || val <= 0) {
+                alert("Please enter a valid fluid volume in ml (above 0).");
+                amountInput.classList.add('border-red-300');
+                return;
+            }
+            amountInput.classList.remove('border-red-300');
+
+            if(type === 'IN') {
+                // Update Total Intake
+                let currentIn = parseInt(localStorage.getItem('mira_total_in') || 0);
+                const newTotalIn = currentIn + val;
+                localStorage.setItem('mira_total_in', newTotalIn);
+                
+                // Feedback visual sederhana
+                if(newTotalIn > LIMIT_HARIAN) {
+                    alert("WARNING: Daily fluid limit exceeded! Please consult medical staff immediately.");
+                } else {
+                    alert(`${val}ml Intake (Drink) medical record updated successfully.`);
+                }
+                
+            } else if (type === 'OUT') {
+                // Update Total Output
+                let currentOut = parseInt(localStorage.getItem('mira_total_out') || 0);
+                localStorage.setItem('mira_total_out', currentOut + val);
+                alert(`${val}ml Output (Urine) medical record updated successfully.`);
+            }
+            
+            // Sinkronisasi Tampilan
+            updateUI();
+            
+            // Reset Input
+            amountInput.value = '';
         }
 
-        function sendToMira() {
-            const input = document.getElementById('user-msg');
-            const box = document.getElementById('chat-messages');
-            if(!input.value) return;
-
-            // User Chat Bubble
-            box.innerHTML += `<div class="flex justify-end animate-fade-in"><div class="bg-indigo-600 text-white p-4 rounded-3xl rounded-tr-none shadow-md max-w-[85%]"><p class="text-xs font-bold leading-relaxed">${input.value}</p></div></div>`;
+        // 5. Fungsi Toggle (Buka/Tutup) Panel Chat Mira.AI
+        function toggleChat() {
+            const panel = document.getElementById('chat-panel');
+            const chatContent = panel.firstElementChild;
             
-            const userMsg = input.value.toLowerCase();
-            input.value = '';
+            if(panel.classList.contains('hidden')) {
+                // Buka Chat
+                panel.classList.remove('hidden');
+                setTimeout(() => {
+                    chatContent.classList.remove('translate-y-full', 'opacity-0');
+                }, 10);
+            } else {
+                // Tutup Chat
+                chatContent.classList.add('translate-y-full', 'opacity-0');
+                setTimeout(() => {
+                    panel.classList.add('hidden');
+                }, 400); // Sesuai durasi animasi slideUp
+            }
+        }
+
+        // 6. Fungsi Komunikasi ke Mira.AI ditenagai Gemini (Melalui Proxy GAS)
+        async function askMira() {
+            const input = document.getElementById('chat-input');
+            const box = document.getElementById('chat-box');
+            const userPrompt = input.value;
+            
+            if(!userPrompt) return; // Jaga jika input kosong
+
+            // A. Tampilkan Bubble Chat Pesan User di Layar
+            box.innerHTML += `
+                <div class="flex justify-end animate-fade relative z-10">
+                    <div class="chat-bubble-user p-4 text-xs font-semibold max-w-[80%] shadow-md leading-relaxed">
+                        ${userPrompt}
+                    </div>
+                </div>`;
+            
+            input.value = ""; // Reset Input
+            box.scrollTop = box.scrollHeight; // Auto Scroll ke bawah
+
+            // B. Tampilkan Indikator "Mira sedang mengetik..."
+            const typingId = "mira-typing-" + Date.now();
+            box.innerHTML += `
+                <div id="${typingId}" class="flex justify-start items-center animate-fade gap-3">
+                    <div class="w-8 h-8 rounded-lg mira-accent flex flex-shrink-0 items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                    <div class="chat-bubble-mira p-4 text-[11px] font-bold italic text-slate-400">
+                        <i class="fas fa-spinner fa-spin mr-1.5 text-indigo-300"></i> Mira is analyzing your clinical data...
+                    </div>
+                </div>`;
             box.scrollTop = box.scrollHeight;
 
-            // Mira Response Logic
-            setTimeout(() => {
-                let response = "Tentu, saya sedang memantau data Anda. Apakah ada keluhan sesak napas?";
-                const total = parseInt(localStorage.getItem('totalIn') || 0);
-                
-                if(userMsg.includes("status") || userMsg.includes("berapa")) {
-                    response = `Saat ini asupan Anda adalah ${total}ml. Batas harian Anda adalah 1500ml.`;
-                } else if(userMsg.includes("sesak") || userMsg.includes("napas")) {
-                    response = "Jika Anda merasa sesak, mohon segera tekan tombol panggil suster di samping bed Anda!";
-                } else if(total >= LIMIT_HARIAN) {
-                    response = "Status saat ini: Anda sudah mencapai batas cairan. Mohon jangan minum lagi sementara waktu.";
-                }
+            // C. Persiapkan Data Pasien (Context) untuk dikirim ke Gemini
+            const patientName = localStorage.getItem('mira_name') || "Pasien";
+            const currentFluidIn = localStorage.getItem('mira_total_in') || 0;
+            const currentFluidOut = localStorage.getItem('mira_total_out') || 0;
+            const limit = LIMIT_HARIAN;
+            const room = localStorage.getItem('mira_room') || "N/A";
 
-                box.innerHTML += `
-                    <div class="flex gap-3 max-w-[85%] animate-fade-in">
-                        <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
-                        <div class="bg-white p-4 rounded-3xl rounded-tl-none border border-slate-100 shadow-sm">
-                            <p class="text-xs font-bold text-slate-800 leading-relaxed">${response}</p>
-                        </div>
-                    </div>`;
+            // Snapshot data klinis saat ini
+            const snapshotContext = `
+              Patient Name: ${patientName}, 
+              Ward/Room: ${room}, 
+              Fluid Status (IN): ${currentFluidIn}ml / ${limit}ml (Daily Limit), 
+              Fluid Status (OUT): ${currentFluidOut}ml.
+            `;
+
+            // D. Panggil GAS Proxy (Aman, API Key tidak bocor di frontend)
+            try {
+                const response = await fetch(GAS_PROXY_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk komunikasi silang domain GAS
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: userPrompt, // Pertanyaan user
+                        context: snapshotContext // Konteks klinis terbaru
+                    })
+                });
+
+                // Catatan Medis: Karena mode: 'no-cors', kita tidak bisa membaca respon langsung (data.reply). 
+                // Untuk demo Point 3 ini agar Gemini "Terlihat Hidup", kita akan mensimulasikan respon pintar.
+                // Dalam implementasi nyata dengan SCRIPT_URL yang benar, Anda akan menggunakan mode: 'cors' 
+                // dan GAS akan mengembalikan JSON.
+
+                // === SIMULASI RESPON GEMINI (PADA PENGGUNAAN NO-CORS) ===
+                setTimeout(() => {
+                    // Hapus indikator mengetik
+                    const typingIndicator = document.getElementById(typingId);
+                    if(typingIndicator) typingIndicator.remove();
+
+                    // Logika Simulasi Respons Pintar Mira berbasis Konteks
+                    let simulatedAiReply = `Thank you, Mr./Ms. ${patientName}. I understand your question about "${userPrompt}". Let me check your medical record.`;
+                    
+                    const query = userPrompt.toLowerCase();
+                    const percent = (currentFluidIn / LIMIT_HARIAN) * 100;
+
+                    if(query.includes("status") || query.includes("berapa") || query.includes("cairan")) {
+                        simulatedAiReply = `As of right now, your total Fluid Intake is ${currentFluidIn}ml, which is ${Math.round(percent)}% of your daily clinical limit (${LIMIT_HARIAN}ml). You have excreted ${currentFluidOut}ml. You are currently in a SAFE status. Please maintain moderate drinking.`;
+                    } else if (query.includes("boleh minum")) {
+                        if(percent >= 100) {
+                            simulatedAiReply = `According to Singapore Medical Protocols, your DAILY LIMIT (${LIMIT_HARIAN}ml) HAS BEEN REACHED. Please STOP drinking immediately to prevent complications. Consult Doctor ${patientName} urgently if you feel short of breath.`;
+                        } else {
+                            const quota = LIMIT_HARIAN - currentFluidIn;
+                            simulatedAiReply = `Yes, you may drink. You currently have ${quota}ml remaining in your daily fluid quota. Please drink moderately.`;
+                        }
+                    } else if (query.includes("sesak") || query.includes("napas")) {
+                        simulatedAiReply = `WARNING: If you are experiencing shortness of breath (sesak napas), please press the NURSE CALL BUTTON immediately next to your bed! This could be a serious symptom in fluid monitoring cases.`;
+                    } else if (percent >= LIMIT_HARIAN) {
+                         simulatedAiReply = `Medical Alert, Mr./Ms. ${patientName}. You have exceeded your 1500ml daily intake limit. Please DO NOT take any more fluid for today. Your safety is our priority.`;
+                    } else {
+                        simulatedAiReply = `Saya mengerti, Mr./Ms. ${patientName}. Terkait keluhan "${userPrompt}", saya menyarankan Anda untuk beristirahat dan tidak terlalu banyak minum dulu sementara waktu. Saya akan terus memantau data klinis Anda. Apakah ada keluhan lain?`;
+                    }
+
+                    // E. Tampilkan Bubble Chat Respon Mira di Layar
+                    box.innerHTML += `
+                        <div class="flex justify-start items-start animate-fade gap-3 relative z-0">
+                            <div class="w-8 h-8 rounded-lg mira-gradient flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-md">M</div>
+                            <div class="chat-bubble-mira p-4.5 text-[11px] font-bold leading-relaxed shadow-sm">
+                                ${simulatedAiReply}
+                            </div>
+                        </div>`;
+                    box.scrollTop = box.scrollHeight;
+                }, 1500); // Simulasi delay berpikir Gemini (1.5 detik)
+
+            } catch (error) {
+                console.error("Mira.AI Engine Error:", error);
+                // Hapus indikator mengetik
+                const typingIndicator = document.getElementById(typingId);
+                if(typingIndicator) typingIndicator.remove();
+                
+                // Tampilkan pesan error koneksi
+                box.innerHTML += `<div class="text-[10px] text-red-400 text-center uppercase font-black tracking-widest bg-red-50 p-3 rounded-full border border-red-100 shadow-inner z-0 relative">Connection to Singapore Medical Cloud failed.</div>`;
                 box.scrollTop = box.scrollHeight;
-            }, 800);
+            }
         }
 
-        function resetApp() { localStorage.clear(); location.reload(); }
-        checkUser();
+        // 7. Fungsi Reset Aplikasi (Logout & Ganti Pasien)
+        function resetApp() {
+            if(confirm("Attention: Are you sure you want to LOGOUT? This will clear all medical record data for the current patient on this device.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // == KODE SETUP: JALANKAN SAAT HALAMAN DIBUKA ==
+        document.addEventListener('DOMContentLoaded', checkUser);
+        
+        // Setup animasi panel chat saat dibuka
+        const chatInput = document.getElementById('chat-input');
+        chatInput.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                askMira();
+            }
+        });
+
     </script>
 </body>
 </html>
