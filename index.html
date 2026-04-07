@@ -3,249 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health - R.S. Jantung dan Pembuluh Darah</title>
+    <title>Mira Health - Clinical Monitoring System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f4f7f6; color: #1e293b; }
+        :root { --mira-slate: #1e293b; --mira-accent: #334155; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: var(--mira-slate); }
         
+        /* Glassmorphism & Clinical Shadows */
         .clinical-card { 
-            background: #ffffff; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.015); 
-            border: 1px solid #e2e8f0; 
-        }
-        
-        .mira-accent { background: #334155; }
-        
-        .status-pill { padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-        .status-normal { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .status-warning { background: #fffbeb; color: #a16207; border: 1px solid #fef3c7; }
-        .status-critical { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; animation: pulseRed 1s infinite; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        
-        @keyframes pulseRed {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
-            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
-        .med-tech-aura {
-            position: relative; display: flex; align-items: center; justify-content: center;
-            width: 80px; height: 80px; margin: 0 auto;
+        .mira-btn {
+            background: var(--mira-accent);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .med-tech-aura::before {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background: #f0f9ff; border: 2px solid #334155; opacity: 0.1;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            animation: rotateAura 6s linear infinite;
-        }
-        @keyframes rotateAura { to { transform: rotate(360deg); } }
+        .mira-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        .mira-btn:active { transform: scale(0.97); }
 
-        .obs-panel {
-            background: #f8fafc; border-left: 3px solid #334155;
-            padding: 15px; border-radius: 8px; margin-top: 15px;
+        /* Status Indicators */
+        .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status-normal { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+        .status-alert { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        /* Custom Chat Bubbles */
+        .chat-bubble-bot { 
+            background: white; border: 1px solid #e2e8f0; 
+            border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .chat-bubble-user { 
+            background: var(--mira-accent); color: white;
+            border-bottom-right-radius: 4px;
         }
 
-        /* Widget AI Styling */
-        #mira-chat-launcher {
-            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
-            background: #334155; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; color: white; font-size: 24px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;
-        }
-        #mira-ai-widget {
-            position: fixed; bottom: 90px; right: 20px; width: 350px; max-width: 90vw;
-            height: 500px; background: white; border-radius: 15px; display: none;
-            flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 9999;
-            overflow: hidden;
-        }
-        .mira-header { background: #334155; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        #chat-window { flex: 1; overflow-y: auto; padding: 15px; background: #f8f9fa; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 13px; line-height: 1.4; }
-        .bot-msg { align-self: flex-start; background: white; border: 1px solid #e2e8f0; color: #1e293b; }
-        .user-msg { align-self: flex-end; background: #334155; color: white; }
-        .mira-footer { padding: 12px; border-top: 1px solid #eee; }
-        .mira-input-wrapper { display: flex; background: #f1f5f9; border-radius: 20px; padding: 5px 15px; align-items: center;}
-        #user-query { border: none; background: transparent; width: 100%; outline: none; padding: 5px; font-size: 14px; }
+        /* Hide Scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="min-h-screen pb-20">
 
-    <div class="max-w-md mx-auto p-4 space-y-6">
-        <div id="setup-form" class="hidden clinical-card p-10 space-y-8 text-center animate-fade">
-            <div class="space-y-6">
-                <div class="med-tech-aura">
-                    <i class="fas fa-shield-virus text-4xl text-slate-700 relative z-10"></i>
-                    <div class="absolute inset-0 bg-cyan-200 blur-3xl opacity-20 rounded-full animate-pulse"></div>
+    <div class="max-w-md mx-auto p-5 space-y-6">
+        
+        <header id="display-profile" class="hidden clinical-card p-4 flex justify-between items-center sticky top-5 z-50">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 mira-btn rounded-xl flex items-center justify-center text-white">
+                    <i class="fas fa-heartbeat"></i>
                 </div>
-                <div class="space-y-3">
-                    <h2 class="text-xl font-bold text-slate-950 tracking-wide uppercase">Mira Health</h2>
-                    <p class="text-[10px] text-slate-500 font-medium uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Digital Monitoring System</p>
+                <div>
+                    <h2 id="patient-name" class="font-bold text-sm tracking-tight leading-none"></h2>
+                    <p id="patient-room" class="text-[10px] text-slate-400 mt-1 font-bold uppercase"></p>
                 </div>
-                <div class="obs-panel text-left">
-                    <p id="ai-welcome-msg" class="text-[11px] font-medium text-slate-700 leading-relaxed">
-                        Analisis Sistem: Mohon lengkapi data administratif pasien untuk memulai monitoring pemulihan.
-                    </p>
+            </div>
+            <button onclick="resetApp()" class="text-slate-300 hover:text-red-500 transition-colors">
+                <i class="fas fa-power-off text-lg"></i>
+            </button>
+        </header>
+
+        <div id="setup-form" class="hidden clinical-card p-8 space-y-6 text-center animate-fade">
+            <div class="space-y-4">
+                <div class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <i class="fas fa-hospital-user text-3xl text-slate-600"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Mira Health</h1>
+                    <p class="text-xs text-slate-400 font-medium tracking-widest uppercase">Clinical Dashboard v2.1</p>
                 </div>
             </div>
             <div class="space-y-4 pt-4">
-                <div class="text-left">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1.5 block tracking-wider">Identitas Pasien</label>
-                    <input id="input-name" type="text" placeholder="Nama Lengkap" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:border-slate-400 text-sm">
-                </div>
-                <input id="input-room" type="text" placeholder="Nomor Kamar & Bed" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:border-slate-400 text-sm">
+                <input id="input-name" type="text" placeholder="Nama Lengkap Pasien" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-semibold outline-none focus:border-slate-400 transition-all text-sm">
+                <input id="input-room" type="text" placeholder="Ruang & Nomor Bed (e.g. ICU-04)" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-semibold outline-none focus:border-slate-400 transition-all text-sm">
             </div>
-            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-5 rounded-xl uppercase text-xs tracking-[0.15em] hover:brightness-110 active:scale-[0.98] transition-all">
-                Aktifkan Sesi Monitoring
+            <button onclick="saveIdentity()" class="w-full mira-btn text-white font-bold py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-slate-200">
+                Otentikasi & Mulai
             </button>
         </div>
 
-        <div id="display-profile" class="hidden clinical-card p-5 flex justify-between items-center sticky top-4 z-50 bg-white/95 backdrop-blur-sm animate-fade">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 mira-accent rounded-lg flex items-center justify-center text-white text-xs border border-slate-600 shadow-inner">
-                    <i class="fas fa-microchip"></i>
-                </div>
-                <div>
-                    <h2 id="patient-name" class="font-bold text-sm text-slate-950 uppercase tracking-tight"></h2>
-                    <p id="patient-room" class="text-[9px] text-slate-500 mt-0.5 font-semibold tracking-wider uppercase"></p>
-                </div>
-            </div>
-            <button onclick="resetApp()" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-300 hover:text-red-500 flex items-center justify-center border border-slate-100 transition-all">
-                <i class="fas fa-power-off text-sm"></i>
-            </button>
-        </div>
-
-        <div id="main-dashboard" class="hidden space-y-5 animate-fade">
-            <div class="clinical-card p-8 space-y-6">
+        <main id="main-dashboard" class="hidden space-y-5">
+            <div class="clinical-card p-8 space-y-8">
                 <div class="flex justify-between items-center">
-                    <span id="hydration-alert" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Observasi Cloud...</span>
-                    <span id="status-tag" class="status-pill status-normal">Sinkron</span>
-                </div>
-                <div class="py-2 text-center">
-                    <span id="percent-display" class="text-7xl font-extrabold tracking-tighter text-slate-950">0<small class="text-xl text-slate-300">%</small></span>
-                    <p class="text-[10px] text-slate-500 mt-2 font-semibold uppercase tracking-wider">Target Harian: 1.500 ml</p>
-                </div>
-                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner border border-slate-200">
-                    <div id="progress-bar" class="mira-accent h-full w-0 transition-all duration-1000 ease-out"></div>
-                </div>
-                <div class="grid grid-cols-3 gap-3 pt-5 border-t border-slate-100">
-                    <div class="text-center p-3 border border-slate-100 rounded-lg">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Asupan</p>
-                        <p class="text-base font-bold text-slate-900" id="intake-display">0 ml</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Monitoring</span>
                     </div>
-                    <div class="text-center p-3 border border-slate-100 rounded-lg">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Keluaran</p>
-                        <p class="text-base font-bold text-slate-900" id="output-display">0 ml</p>
+                    <span id="status-tag" class="status-pill status-normal">Stabil</span>
+                </div>
+
+                <div class="text-center relative">
+                    <span id="percent-display" class="text-8xl font-black tracking-tighter tabular-nums">0<small class="text-2xl text-slate-300">%</small></span>
+                    <p class="text-[11px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Hydration Progress</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                        <span>Intake Capacity</span>
+                        <span>1.500 ML</span>
                     </div>
-                    <div class="text-center p-3 border border-sky-100 bg-sky-50 rounded-lg">
-                        <p class="text-[8px] font-bold text-sky-600 uppercase mb-1.5 tracking-wider">Balance</p>
-                        <p class="text-base font-bold text-sky-900" id="balance-display">0 ml</p>
+                    <div class="w-full bg-slate-100 rounded-full h-4 p-1 shadow-inner border border-slate-200">
+                        <div id="progress-bar" class="mira-btn h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-50">
+                    <div class="text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">In</p>
+                        <p class="text-lg font-extrabold" id="intake-display">0 <span class="text-[10px]">ml</span></p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Out</p>
+                        <p class="text-lg font-extrabold" id="output-display">0 <span class="text-[10px]">ml</span></p>
+                    </div>
+                    <div class="text-center bg-slate-50 p-2 rounded-xl">
+                        <p class="text-[9px] font-bold text-slate-600 uppercase mb-1">Net</p>
+                        <p class="text-lg font-extrabold text-slate-900" id="balance-display">0 <span class="text-[10px]">ml</span></p>
                     </div>
                 </div>
             </div>
 
             <div class="clinical-card p-6 space-y-4">
                 <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-wider">Volume Cairan (ml)</label>
-                        <input id="fluid-amount" type="number" inputmode="numeric" placeholder="Misal: 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl font-bold text-2xl outline-none focus:ring-2 focus:ring-slate-100 transition-all">
+                    <div class="flex-[2]">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-widest">Volume (ml)</label>
+                        <input id="fluid-amount" type="number" placeholder="0" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl font-bold text-3xl outline-none focus:bg-white transition-all">
                     </div>
-                    <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-wider">Tipe</label>
-                        <select id="fluid-type" class="w-full h-[66px] bg-slate-50 border border-slate-200 px-3 rounded-xl font-bold text-xs outline-none focus:border-slate-400 transition-all">
-                            <option value="IN">💧 Masuk</option>
-                            <option value="OUT">Urin</option>
+                    <div class="flex-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-widest">Type</label>
+                        <select id="fluid-type" class="w-full h-[74px] bg-slate-50 border border-slate-200 px-3 rounded-2xl font-bold text-xs outline-none cursor-pointer">
+                            <option value="IN">💧 MASUK</option>
+                            <option value="OUT">🚽 KELUAR</option>
                         </select>
                     </div>
                 </div>
-                <button id="submit-btn" onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-[0.15em]">
-                    Catat ke Rekam Medis Cloud
+                <button id="submit-btn" onclick="addRecord()" class="w-full mira-btn text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest">
+                    <i class="fas fa-cloud-upload-alt"></i> Sync Data Ke Cloud
                 </button>
             </div>
 
-            <div class="clinical-card p-6 space-y-5">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Laporan Tren Pemulihan 7 Hari</h3>
-                <div class="h-40 w-full"><canvas id="weeklyChart"></canvas></div>
+            <div class="clinical-card p-6">
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">7-Day Clinical Trend</h3>
+                <div class="h-44"><canvas id="weeklyChart"></canvas></div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <div id="mira-chat-launcher" onclick="toggleMiraChat()"><i class="fas fa-robot"></i></div>
-    <div id="mira-ai-widget">
-        <div class="mira-header"><strong>Mira Health AI</strong><span onclick="toggleMiraChat()" style="cursor:pointer">&times;</span></div>
-        <div id="chat-window">
-            <div class="msg bot-msg">Halo! Saya Mira. Saya memantau data cairan Anda secara real-time. Ada yang ingin dikonsultasikan?</div>
+    <div id="mira-chat-launcher" onclick="toggleMiraChat()" class="hover:scale-110 transition-transform">
+        <i class="fas fa-comment-medical"></i>
+    </div>
+
+    <div id="mira-ai-widget" class="clinical-card">
+        <div class="mira-header">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fas fa-robot text-xs"></i></div>
+                <div>
+                    <p class="text-xs font-bold leading-none">Mira Clinical AI</p>
+                    <p class="text-[8px] text-white/60 uppercase tracking-widest">Automated Support</p>
+                </div>
+            </div>
+            <button onclick="toggleMiraChat()" class="text-white/60 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
-        <div id="mira-typing" style="display:none; padding: 5px 15px; font-size:12px; color:gray;">Mira sedang menganalisis data...</div>
+        
+        <div id="chat-window" class="no-scrollbar">
+            <div class="msg chat-bubble-bot">Selamat datang di Mira Clinical AI. Saya memantau data asupan cairan Anda secara real-time untuk memastikan keseimbangan hemodinamik tetap optimal.</div>
+        </div>
+        
+        <div id="mira-typing" class="hidden px-4 py-2 text-[10px] text-slate-400 font-medium italic">Mira sedang menganalisis data klinis...</div>
+        
         <div class="mira-footer">
             <div class="mira-input-wrapper">
-                <input type="text" id="user-query" placeholder="Tanya tentang kondisi Anda..." autocomplete="off">
-                <button onclick="sendToMiraAI()" style="border:none; background:none; color:#334155; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+                <input type="text" id="user-query" placeholder="Tanya tentang balance cairan..." class="flex-1">
+                <button onclick="sendToMiraAI()" class="text-slate-400 hover:text-slate-600 px-2"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyilbUEyIqqcu-3q8uMZhD7wC7-1hIQf-355TBXC1HHO4FihCeBlgVE9m70hrQqK_lA/exec";
-        const DAILY_LIMIT = 1500;
+        // SENSITIVE DATA: Sebaiknya ditaruh di Environment Variable jika di Production
+        const CONFIG = {
+            GAS_URL: "https://script.google.com/macros/s/AKfycbyilbUEyIqqcu-3q8uMZhD7wC7-1hIQf-355TBXC1HHO4FihCeBlgVE9m70hrQqK_lA/exec",
+            API_KEY: "AIzaSyBRGjF_AsDdN7lU-gy1KMZ4mqXawzv-nSc", // WARNING: Use Backend in Real Production
+            DAILY_LIMIT: 1500
+        };
+
         let myChart = null;
 
-        // Dashboard Logic
-        function setAiGreeting() {
-            const msgEl = document.getElementById('ai-welcome-msg');
-            const hrs = new Date().getHours();
-            let greet = (hrs < 11) ? "Selamat Pagi" : (hrs < 15) ? "Selamat Siang" : (hrs < 19) ? "Selamat Sore" : "Selamat Malam";
-            msgEl.innerText = `${greet}! Sistem monitoring siap memantau perkembangan asupan cairan Anda. Salam Sehat.`;
-        }
-
+        // AUTH & SYNC
         async function syncWithCloud() {
             const name = localStorage.getItem('mira_name');
             const room = localStorage.getItem('mira_room');
-            if(!name || !room) {
+            
+            if(!name) {
                 document.getElementById('setup-form').classList.remove('hidden');
-                setAiGreeting();
                 return;
             }
+
             document.getElementById('display-profile').classList.remove('hidden');
             document.getElementById('main-dashboard').classList.remove('hidden');
             document.getElementById('patient-name').innerText = name;
-            document.getElementById('patient-room').innerText = `KAMAR ${room}`;
+            document.getElementById('patient-room').innerText = room;
+
             try {
-                const response = await fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}`);
-                const data = await response.json();
-                updateDisplay(data.totalIn || 0, data.totalOut || 0, data.lastUpdate);
+                const res = await fetch(`${CONFIG.GAS_URL}?name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}`);
+                const data = await res.json();
+                updateUI(data.totalIn || 0, data.totalOut || 0);
                 if(data.weekly) renderChart(data.weekly);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Sync Error", e); }
+        }
+
+        function updateUI(tin, tout) {
+            const balance = tin - tout;
+            const percent = Math.min((tin / CONFIG.DAILY_LIMIT) * 100, 100);
+            
+            document.getElementById('intake-display').innerHTML = `${tin} <span class="text-[10px]">ml</span>`;
+            document.getElementById('output-display').innerHTML = `${tout} <span class="text-[10px]">ml</span>`;
+            document.getElementById('balance-display').innerHTML = `${balance} <span class="text-[10px]">ml</span>`;
+            document.getElementById('percent-display').innerHTML = `${Math.round(percent)}<small class="text-2xl text-slate-300">%</small>`;
+            document.getElementById('progress-bar').style.width = percent + '%';
+
+            const tag = document.getElementById('status-tag');
+            if(percent >= 100) {
+                tag.innerText = "Target Tercapai";
+                tag.className = "status-pill status-normal bg-emerald-50 text-emerald-600 border-emerald-100";
+            }
         }
 
         async function addRecord() {
-            const amountInput = document.getElementById('fluid-amount');
+            const amt = document.getElementById('fluid-amount');
             const type = document.getElementById('fluid-type').value;
             const btn = document.getElementById('submit-btn');
-            const val = parseInt(amountInput.value);
-            if(!val || val <= 0) return amountInput.classList.add('border-red-400');
+            
+            if(!amt.value || amt.value <= 0) return amt.focus();
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-sync fa-spin"></i> Menghubungkan Cloud...`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Synchronizing...`;
 
             try {
-                const response = await fetch(GAS_URL, {
+                const response = await fetch(CONFIG.GAS_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         type: "SAVE_RECORD",
                         name: localStorage.getItem('mira_name'),
                         room: localStorage.getItem('mira_room'),
                         fluidType: type === 'IN' ? 'Minum/Infus' : 'Urin',
-                        amount: val
+                        amount: parseInt(amt.value)
                     })
                 });
                 const result = await response.json();
-                updateDisplay(result.totalIn, result.totalOut, new Date().toISOString());
-                if(result.weekly) renderChart(result.weekly);
-                amountInput.value = '';
-                btn.innerHTML = `<i class="fas fa-check-circle"></i> Data Tersimpan`;
-            } catch (e)
+                updateUI(result.totalIn, result.totalOut);
+                amt.value = '';
+                btn.innerHTML = `<i class="fas fa-check"></i> Berhasil Terunggah`;
+            } catch (e) {
+                btn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Gagal Koneksi`;
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Sync Data Ke Cloud`;
+                }, 2000);
+            }
+        }
+
+        // AI ENGINE
+        async function sendToMiraAI() {
+            const queryEl = document.getElementById('user-query');
+            const chatWin = document.getElementById('chat-window');
+            const typing = document.getElementById('mira-typing');
+            const text = queryEl.value.trim();
+            
+            if(!text) return;
+
+            // Render User Msg
+            chatWin.innerHTML += `<div class="msg chat-bubble-user ml-auto">${text}</div>`;
+            queryEl.value = '';
+            typing.classList.remove('hidden');
+            chatWin.scrollTop = chatWin.scrollHeight;
+
+            // Context Gathering
+            const context = {
+                name: localStorage.getItem('mira_name'),
+                in: document.getElementById('intake-display').innerText,
+                out: document.getElementById('output-display').innerText,
+                net: document.getElementById('balance-display').innerText
+            };
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `
+                            PERSONA: Mira, Digital Health Assistant di Rumah Sakit Jantung & Pembuluh Darah (RSJPD).
+                            DATA PASIEN SAAT INI: Nama: ${context.name}, Intake: ${context.in}, Output: ${context.out}, Net Balance: ${context.net}.
+                            TUGAS: Jawab pertanyaan pasien dengan gaya bahasa medis yang profesional, menenangkan, singkat (maks 2 kalimat), dan berbasis data di atas. Jika balance terlalu positif atau negatif, ingatkan dengan sopan.
+                            USER: ${text}` 
+                        }] }]
+                    })
+                });
+                const data = await response.json();
+                const reply = data.candidates[0].content.parts[0].text;
+                
+                typing.classList.add('hidden');
+                chatWin.innerHTML += `<div class="msg chat-bubble-bot">${reply}</div>`;
+                chatWin.scrollTop = chatWin.scrollHeight;
+            } catch (e) {
+                typing.classList.add('hidden');
+                chatWin.innerHTML += `<div class="msg chat-bubble-bot text-red-500">Sistem sedang maintenance. Mohon hubungi perawat jaga.</div>`;
+            }
+        }
+
+        // UI HELPERS
+        function toggleMiraChat() {
+            const w = document.getElementById('mira-ai-widget');
+            w.style.display = (w.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function saveIdentity() {
+            const n = document.getElementById('input-name').value;
+            const r = document.getElementById('input-room').value;
+            if(n && r) {
+                localStorage.setItem('mira_name', n.toUpperCase());
+                localStorage.setItem('mira_room', r.toUpperCase());
+                location.reload();
+            }
+        }
+
+        function resetApp() { if(confirm("Keluar dari sesi klinis ini?")) { localStorage.clear(); location.reload(); } }
+
+        function renderChart(history) {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.labels,
+                    datasets: [{
+                        data: history.values,
+                        borderColor: '#334155',
+                        backgroundColor: 'rgba(51, 65, 85, 0.05)',
+                        borderWidth: 3, fill: true, tension: 0.4, pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' }, color: '#94a3b8' } } }
+                }
+            });
+        }
+
+        document.getElementById('user-query').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendToMiraAI(); });
+        document.addEventListener('DOMContentLoaded', syncWithCloud);
+    </script>
+</body>
+</html>
