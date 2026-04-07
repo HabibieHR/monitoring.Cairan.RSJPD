@@ -3,350 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira Health - Pro Dashboard</title>
+    <title>Mira Health - Concierge Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --mira-gold: #c2a373; /* Emas Lembut */
+            --mira-gold-dark: #b18e5b;
+            --mira-slate: #475569; /* Slate Blue untuk aksen data */
+            --mira-bg: #fdfdfc; /* Warm Ivory/Putih Gading */
+            --mira-text: #1f2937; /* Charcoal */
+        }
+
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #0f172a; /* Deep Navy Background */
-            color: #f8fafc;
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--mira-bg); 
+            color: var(--mira-text);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Card Bergaya Premium Dark */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        h1, h2, h3, .serif-font, #percent-display {
+            font-family: 'Cormorant Garamond', serif;
         }
 
-        /* Tombol Aksi Mewah */
-        .btn-primary {
-            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        /* Kartu Mewah dengan Border Emas Tipis */
+        .premium-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid rgba(194, 163, 115, 0.15); /* Border Emas Halus */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); /* Shadow sangat lembut */
+            transition: box-shadow 0.3s ease;
+        }
+        .premium-card:hover {
+            box-shadow: 0 15px 40px rgba(194, 163, 115, 0.05);
+        }
+
+        /* Tombol Emas Elegan */
+        .btn-gold {
+            background-color: var(--mira-gold);
             color: white;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.05em;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(2, 132, 199, 0.4); }
-
-        /* Input Minimalist */
-        .input-dark {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s;
+        .btn-gold:hover {
+            background-color: var(--mira-gold-dark);
+            transform: translateY(-1px);
         }
-        .input-dark:focus { border-color: #38bdf8; background: rgba(15, 23, 42, 0.9); }
 
-        /* Status & Badge */
-        .badge-live {
-            background: rgba(34, 197, 94, 0.1);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.2);
+        /* Input Minimalis Berkelas */
+        .input-premium {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: var(--mira-text);
+            border-radius: 12px;
+            transition: border-color 0.3s;
+        }
+        .input-premium:focus {
+            border-color: var(--mira-gold);
+            outline: none;
+            box-ring: 1px var(--mira-gold);
+        }
+
+        /* Badge Status Humanis */
+        .badge-status {
+            font-family: 'Inter', sans-serif;
+            background: rgba(194, 163, 115, 0.08);
+            color: var(--mira-gold-dark);
+            border: 1px solid rgba(194, 163, 115, 0.2);
             font-size: 10px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 99px;
-            letter-spacing: 1px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
-        /* Animasi Progress */
+        /* Progress Bar Emas */
+        .progress-container {
+            background-color: #f1f5f9;
+            height: 10px;
+            border-radius: 99px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
         .progress-fill {
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+            background-color: var(--mira-gold);
             border-radius: 99px;
-            transition: width 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Chat Widget Modern */
-        #ai-trigger {
-            background: #f8fafc;
-            color: #0f172a;
-            width: 56px; height: 56px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        /* Chat Concierge (Bukan Robot) */
+        #concierge-trigger {
+            background-color: var(--mira-gold);
+            color: white;
+            width: 60px; height: 60px;
+            box-shadow: 0 10px 25px rgba(194, 163, 115, 0.3);
+            border-radius: 50%;
         }
 
-        #mira-ai-panel {
-            background: #1e293b;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        #mira-concierge-panel {
+            background: #ffffff;
+            border: 1px solid rgba(194, 163, 115, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
         }
+
+        .chat-header {
+            background-color: #fafaf9;
+            border-bottom: 1px solid #eee;
+            color: var(--mira-text);
+        }
+        
+        .chat-bubble-bot {
+            background-color: #f8fafc;
+            border: 1px solid #eee;
+            border-radius: 16px 16px 16px 4px;
+        }
+        
+        .chat-bubble-user {
+            background-color: var(--mira-gold);
+            color: white;
+            border-radius: 16px 16px 4px 16px;
+        }
+
+        /* Animasi Fade Halus */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.6s ease-out; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="min-h-screen p-4 md:p-10">
 
-    <div class="max-w-md mx-auto space-y-6">
+    <div class="max-w-xl mx-auto space-y-8 animate-fade">
         
         <header id="header-profile" class="hidden flex justify-between items-center px-2">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center">
-                    <i class="fas fa-user-md text-white"></i>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-inner">
+                    <i class="fas fa-user text-slate-400 text-lg"></i>
                 </div>
                 <div>
-                    <h2 id="patient-name-top" class="text-sm font-bold tracking-tight"></h2>
-                    <div class="flex items-center gap-2">
-                        <span class="badge-live uppercase" id="patient-room-top"></span>
+                    <h2 id="patient-name-top" class="text-xl font-bold tracking-tight serif-font text-gray-900"></h2>
+                    <div class="flex items-center gap-3 mt-1.5">
+                        <span class="badge-status" id="patient-room-top"></span>
+                        <span class="text-[11px] text-slate-400 font-medium"> Concierge Service</span>
                     </div>
                 </div>
             </div>
-            <button onclick="resetApp()" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors">
-                <i class="fas fa-power-off"></i>
+            <button onclick="resetApp()" class="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-100 transition-all">
+                <i class="fas fa-power-off text-sm"></i>
             </button>
         </header>
 
-        <div id="setup-view" class="hidden glass-card p-10 space-y-8 animate-fade text-center">
-            <div class="space-y-2">
-                <h1 class="text-3xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">Mira Health.</h1>
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-[0.3em]">Precision Monitoring</p>
+        <div id="setup-view" class="hidden premium-card p-12 space-y-10 animate-fade text-center">
+            <div class="space-y-3">
+                <h1 class="text-4xl font-extrabold serif-font text-gray-950 tracking-tight">Selamat Datang di Mira Health.</h1>
+                <p class="text-sm text-slate-500 font-medium max-w-sm mx-auto">Mohon lengkapi identitas Anda untuk mengaktifkan layanan pemantauan personal.</p>
             </div>
-            <div class="space-y-4 pt-4">
-                <input id="input-name" type="text" placeholder="Full Patient Name" class="input-dark w-full p-4 rounded-2xl outline-none text-sm font-semibold">
-                <input id="input-room" type="text" placeholder="Ward / Bed Number" class="input-dark w-full p-4 rounded-2xl outline-none text-sm font-semibold">
-                <button onclick="saveIdentity()" class="btn-primary w-full p-4 rounded-2xl font-bold text-sm uppercase tracking-widest mt-4">
-                    Initialize System
+            <div class="space-y-5 pt-4 max-w-sm mx-auto">
+                <input id="input-name" type="text" placeholder="Nama Lengkap Pasien" class="input-premium w-full p-4.5 outline-none text-sm font-medium text-gray-800">
+                <input id="input-room" type="text" placeholder="Nomor Kamar & Bed (e.g., Suite 301-A)" class="input-premium w-full p-4.5 outline-none text-sm font-medium text-gray-800">
+                <button onclick="saveIdentity()" class="btn-gold w-full p-4.5 rounded-xl text-xs uppercase tracking-widest mt-6 shadow-md shadow-amber-900/10">
+                    Aktifkan Layanan Concierge
                 </button>
             </div>
         </div>
 
-        <main id="main-view" class="hidden space-y-6">
+        <main id="main-view" class="hidden space-y-8">
             
-            <section class="glass-card p-8 relative overflow-hidden">
-                <div class="flex justify-between items-start mb-10">
-                    <span class="badge-live">Real-time Data</span>
-                    <i class="fas fa-ellipsis-v text-slate-500"></i>
+            <section class="premium-card p-10 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-10">
+                    <span class="badge-status">Pemantauan Aktif</span>
+                    <span class="text-[11px] font-semibold text-slate-400">RSJPD Concierge</span>
                 </div>
 
-                <div class="flex flex-col items-center justify-center space-y-2">
+                <div class="flex flex-col items-center justify-center space-y-2.5">
                     <div class="relative">
-                        <span id="percent-display" class="text-8xl font-extrabold tracking-tighter tabular-nums">0<small class="text-xl text-slate-500">%</small></span>
+                        <span id="percent-display" class="text-[110px] font-bold tracking-tighter tabular-nums leading-none text-gray-950">0<small class="text-3xl text-slate-300 serif-font">%</small></span>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Daily Hydration Goal</p>
+                    <p class="text-[12px] text-slate-500 font-semibold uppercase tracking-[0.2em]">Pencapaian Asupan Cairan Harian</p>
                 </div>
 
-                <div class="mt-10 space-y-2">
-                    <div class="w-full bg-slate-900/50 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                <div class="mt-12 space-y-3.5">
+                    <div class="progress-container">
                         <div id="progress-bar" class="progress-fill h-full w-0"></div>
                     </div>
-                    <div class="flex justify-between text-[10px] font-bold text-slate-500 px-1">
-                        <span>CURRENT: <b class="text-sky-400" id="current-ml">0 ML</b></span>
-                        <span>TARGET: 1.500 ML</span>
+                    <div class="flex justify-between text-[11px] font-bold text-slate-500 px-1 uppercase tracking-wider">
+                        <span>HARI INI: <b class="text-gray-900 font-extrabold" id="current-ml">0 ML</b></span>
+                        <span>TARGET MEDIS: 1.500 ML</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 mt-10">
-                    <div class="bg-slate-900/40 p-4 rounded-2xl border border-white/5 text-center">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Intake</p>
-                        <p class="text-sm font-bold" id="val-in">0</p>
+                <div class="grid grid-cols-3 gap-3 mt-12 pt-6 border-t border-slate-100">
+                    <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-100 text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Total Masuk</p>
+                        <p class="text-xl font-extrabold text-gray-900 serif-font" id="val-in">0 ml</p>
                     </div>
-                    <div class="bg-slate-900/40 p-4 rounded-2xl border border-white/5 text-center">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Output</p>
-                        <p class="text-sm font-bold" id="val-out">0</p>
+                    <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-100 text-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Total Keluar</p>
+                        <p class="text-xl font-extrabold text-gray-900 serif-font" id="val-out">0 ml</p>
                     </div>
-                    <div class="bg-sky-500/10 p-4 rounded-2xl border border-sky-500/20 text-center">
-                        <p class="text-[9px] font-bold text-sky-400 uppercase mb-1">Balance</p>
-                        <p class="text-sm font-bold text-sky-400" id="val-net">0</p>
+                    <div class="bg-amber-50/50 p-5 rounded-xl border border-amber-100/50 text-center">
+                        <p class="text-[10px] font-bold text-amber-700 uppercase mb-1.5 tracking-wider">Balance Net</p>
+                        <p class="text-xl font-extrabold text-amber-900 serif-font" id="val-net">0 ml</p>
                     </div>
                 </div>
             </section>
 
-            <section class="glass-card p-6 space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Volume (ML)</label>
-                        <input id="fluid-amt" type="number" placeholder="250" class="input-dark w-full p-4 rounded-2xl font-bold text-2xl outline-none">
+            <section class="premium-card p-8 space-y-5">
+                <div class="grid grid-cols-3 gap-5">
+                    <div class="col-span-2 space-y-2.5">
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Volume Cairan (ML)</label>
+                        <input id="fluid-amt" type="number" placeholder="Misal: 250" class="input-premium w-full p-4.5 rounded-xl font-bold text-3xl outline-none serif-font">
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-bold text-slate-500 uppercase tracking-widest ml-1">Type</label>
-                        <select id="fluid-cat" class="input-dark w-full h-[68px] px-3 rounded-2xl font-bold text-xs outline-none appearance-none">
-                            <option value="IN">💧 INTAKE</option>
-                            <option value="OUT">🚽 OUTPUT</option>
+                    <div class="space-y-2.5">
+                        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Kategori</label>
+                        <select id="fluid-cat" class="input-premium w-full h-[76px] px-3.5 rounded-xl font-semibold text-xs outline-none cursor-pointer appearance-none bg-white">
+                            <option value="IN">💧 MASUK</option>
+                            <option value="OUT">🚽 KELUAR</option>
                         </select>
                     </div>
                 </div>
-                <button id="sync-btn" onclick="addRecord()" class="btn-primary w-full p-5 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-                    <i class="fas fa-bolt"></i> Log to Cloud
+                <button id="sync-btn" onclick="addRecord()" class="btn-gold w-full p-5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3.5 mt-5 shadow-lg shadow-amber-900/10">
+                    <i class="fas fa-feather-alt text-amber-100"></i> Catat Dalam Rekam Medis Cloud
                 </button>
             </section>
 
-            <section class="glass-card p-6">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Weekly Fluid Dynamics</h3>
-                <div class="h-40"><canvas id="weeklyChart"></canvas></div>
+            <section class="premium-card p-8">
+                <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-7 px-1">Tren Klinis 7 Hari</h3>
+                <div class="h-44"><canvas id="weeklyChart"></canvas></div>
             </section>
         </main>
     </div>
 
-    <div id="ai-trigger" onclick="toggleChat()" class="fixed bottom-8 right-8 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all z-[100]">
-        <i class="fas fa-robot text-xl"></i>
+    <div id="concierge-trigger" onclick="toggleChat()" class="fixed bottom-10 right-10 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-all z-[100]">
+        <i class="fas fa-bell text-2xl"></i>
     </div>
 
-    <div id="mira-ai-panel" class="fixed bottom-28 right-6 w-80 h-[450px] rounded-3xl hidden flex-col overflow-hidden z-[100] border border-white/10 animate-fade">
-        <div class="p-5 bg-slate-800/80 border-b border-white/5 flex justify-between items-center">
+    <div id="mira-concierge-panel" class="fixed bottom-32 right-8 w-80 h-[480px] hidden flex-col overflow-hidden z-[100] animate-fade border border-slate-100">
+        <div class="p-5 chat-header border-b border-slate-100 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
-                <span class="text-xs font-bold tracking-tight">Mira Intelligence</span>
+                <div class="w-2.5 h-2.5 bg-amber-400 rounded-full"></div>
+                <span class="text-sm font-bold tracking-tight text-gray-900 serif-font">Asisten Concierge</span>
             </div>
-            <button onclick="toggleChat()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+            <button onclick="toggleChat()" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
         </div>
-        <div id="chat-win" class="flex-1 overflow-y-auto p-4 space-y-4 text-[12px] leading-relaxed no-scrollbar">
-            <div class="bg-slate-800 p-3 rounded-2xl rounded-bl-none border border-white/5">
-                Sistem aktif. Saya Mira, asisten klinis Anda. Bagaimana kondisi Anda hari ini?
-            </div>
-        </div>
-        <div id="typing-ui" class="hidden px-4 py-2 text-[10px] text-sky-400 font-bold animate-pulse">Analysing Clinical Data...</div>
-        <div class="p-4 bg-slate-900/50">
-            <div class="flex bg-slate-800 rounded-xl p-2 items-center">
-                <input id="user-input" type="text" placeholder="Ask about health..." class="bg-transparent border-none outline-none text-xs flex-1 px-2 text-white">
-                <button onclick="askAI()" class="text-sky-400 p-2"><i class="fas fa-paper-plane"></i></button>
+        <div id="chat-win" class="flex-1 overflow-y-auto p-5 space-y-4 text-[13px] text-gray-700 leading-relaxed no-scrollbar bg-white">
+            <div class="p-4 chat-bubble-bot serif-font italic">
+                Sesi concierge diaktifkan. Saya Asisten Medis Mira, siap membantu Anda memantau keseimbangan cairan. Apakah ada yang ingin ditanyakan mengenai data Anda?
             </div>
         </div>
-    </div>
-
-    <script>
-        const CFG = {
-            API: "AIzaSyBRGjF_AsDdN7lU-gy1KMZ4mqXawzv-nSc",
-            GAS: "https://script.google.com/macros/s/AKfycbyilbUEyIqqcu-3q8uMZhD7wC7-1hIQf-355TBXC1HHO4FihCeBlgVE9m70hrQqK_lA/exec",
-            GOAL: 1500
-        };
-        let chart = null;
-
-        async function init() {
-            const n = localStorage.getItem('mira_name');
-            const r = localStorage.getItem('mira_room');
-            if(!n) return document.getElementById('setup-view').classList.remove('hidden');
-
-            document.getElementById('header-profile').classList.remove('hidden');
-            document.getElementById('main-view').classList.remove('hidden');
-            document.getElementById('patient-name-top').innerText = n;
-            document.getElementById('patient-room-top').innerText = r;
-
-            try {
-                const res = await fetch(`${CFG.GAS}?name=${encodeURIComponent(n)}&room=${encodeURIComponent(r)}`);
-                const data = await res.json();
-                updateUI(data.totalIn || 0, data.totalOut || 0);
-                if(data.weekly) renderChart(data.weekly);
-            } catch(e) { console.error(e); }
-        }
-
-        function updateUI(tin, tout) {
-            const net = tin - tout;
-            const pc = Math.min((tin / CFG.GOAL) * 100, 100);
-            document.getElementById('current-ml').innerText = `${tin} ML`;
-            document.getElementById('val-in').innerText = tin;
-            document.getElementById('val-out').innerText = tout;
-            document.getElementById('val-net').innerText = net;
-            document.getElementById('percent-display').innerHTML = `${Math.round(pc)}<small class="text-xl text-slate-500">%</small>`;
-            document.getElementById('progress-bar').style.width = pc + '%';
-        }
-
-        async function addRecord() {
-            const amt = document.getElementById('fluid-amt');
-            const cat = document.getElementById('fluid-cat').value;
-            const btn = document.getElementById('sync-btn');
-            if(!amt.value || amt.value <= 0) return;
-
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> SYNCING...`;
-
-            try {
-                const res = await fetch(CFG.GAS, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        type: "SAVE_RECORD",
-                        name: localStorage.getItem('mira_name'),
-                        room: localStorage.getItem('mira_room'),
-                        fluidType: cat === 'IN' ? 'Minum/Infus' : 'Urin',
-                        amount: parseInt(amt.value)
-                    })
-                });
-                const d = await res.json();
-                updateUI(d.totalIn, d.totalOut);
-                amt.value = '';
-                btn.innerHTML = `<i class="fas fa-check"></i> SUCCESS`;
-            } catch(e) { btn.innerHTML = `FAILED`; }
-            finally { setTimeout(() => { btn.disabled = false; btn.innerHTML = `<i class="fas fa-bolt"></i> Log to Cloud`; }, 2000); }
-        }
-
-        async function askAI() {
-            const inp = document.getElementById('user-input');
-            const win = document.getElementById('chat-win');
-            const type = document.getElementById('typing-ui');
-            const txt = inp.value.trim();
-            if(!txt) return;
-
-            win.innerHTML += `<div class="bg-sky-500/20 p-3 rounded-2xl rounded-br-none border border-sky-500/10 text-right ml-8">${txt}</div>`;
-            inp.value = '';
-            type.classList.remove('hidden');
-            win.scrollTop = win.scrollHeight;
-
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CFG.API}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `
-                            PRO MODE: You are Mira, a high-end medical assistant at RSJPD.
-                            DATA: Intake ${document.getElementById('val-in').innerText}ml, Output ${document.getElementById('val-out').innerText}ml.
-                            TONE: Professional, succinct, Swiss-clinic style (cold but caring). Max 2 sentences.
-                            USER: ${txt}` 
-                        }] }]
-                    })
-                });
-                const d = await res.json();
-                const reply = d.candidates[0].content.parts[0].text;
-                type.classList.add('hidden');
-                win.innerHTML += `<div class="bg-slate-800 p-3 rounded-2xl rounded-bl-none border border-white/5 mr-8">${reply}</div>`;
-                win.scrollTop = win.scrollHeight;
-            } catch(e) { type.classList.add('hidden'); }
-        }
-
-        function renderChart(h) {
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: h.labels,
-                    datasets: [{
-                        data: h.values,
-                        borderColor: '#38bdf8',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: (c) => {
-                            const g = c.chart.ctx.createLinearGradient(0,0,0,200);
-                            g.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
-                            g.addColorStop(1, 'transparent');
-                            return g;
-                        }
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { display: false }, 
-                        x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9, weight: 'bold' } } } 
-                    }
-                }
-            });
-        }
-
-        function saveIdentity() {
-            const n = document.getElementById('input-name').value;
-            const r = document.getElementById('input-room').value;
-            if(n && r) { localStorage.setItem('mira_name', n.toUpperCase()); localStorage.setItem('mira_room', r.toUpperCase()); location.reload(); }
-        }
-        function toggleChat() { const p = document.getElementById('mira-ai-panel'); p.classList.toggle('hidden'); p.classList.toggle('flex'); }
-        function resetApp() { if(confirm("Terminate Session?")) { localStorage.clear(); location.reload(); } }
-        
-        document.getElementById('user-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') askAI(); });
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
-</body>
-</html>
+        <div id="typing-ui" class="hidden px-5 py-2 text-[11px] text-amber-700 font-semibold italic animate-pulse">Asisten sedang menganalisis data klinis...</div>
+        <div class="p-4 bg-slate-50 border-t border-slate-100 mt-auto">
+            <div class="flex bg-white rounded-full border border-slate-200 p-1.5 items-center shadow-inner">
+                <input id="user-input" type="text" placeholder="Tanya tentang balance cairan..." class="bg-transparent border-none outline-none text-xs flex-1 px-3 text-gray-900 font-medium">
+                <button onclick="askAI()" class="text-amber-600 p-2.5 rounded-full hover:
