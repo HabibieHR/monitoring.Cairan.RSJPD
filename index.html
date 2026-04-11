@@ -3,130 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring RSJPD - Clinical Suite</title>
+    <title>Mira Health - R.S. Internasional Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; }
-        .clinical-card { background: #ffffff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .rsjpd-accent { background: #0f172a; }
-        .status-pill { padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-        .status-normal { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: #f4f7f6; color: #1e293b; }
+        
+        /* Kartu Steril dengan Shadow Halus */
+        .clinical-card { 
+            background: #ffffff; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.015); 
+            border: 1px solid #e2e8f0; 
+        }
+        
+        /* Warna Aksen Medis Profesional (Slate Gray/Indigo) */
+        .mira-accent { background: #334155; }
+        
+        /* Status Pills Tingkat Klinik */
+        .status-pill { padding: 5px 12px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+        .status-normal { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .status-warning { background: #fffbeb; color: #a16207; border: 1px solid #fef3c7; }
         .status-critical { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; animation: pulseRed 1s infinite; }
-        @keyframes pulseRed { 0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2); } 70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } }
-        .obs-panel { background: #f8fafc; border-left: 4px solid #0f172a; padding: 16px; border-radius: 4px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        
+        @keyframes pulseRed {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+
+        /* Konsep Baru: Med-Tech Aura (Bukan Robot) */
+        .med-tech-aura {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+        .med-tech-aura::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f0f9ff;
+            border: 2px solid #334155;
+            opacity: 0.1;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            animation: rotateAura 6s linear infinite;
+        }
+        @keyframes rotateAura { to { transform: rotate(360deg); } }
+
+        /* Panel Observasi Formal (Pengganti Bubble) */
+        .obs-panel {
+            background: #f8fafc;
+            border-left: 3px solid #334155;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen pb-10">
 
     <div class="max-w-md mx-auto p-4 space-y-6">
         
-        <div id="display-profile" class="hidden clinical-card p-5 flex justify-between items-center sticky top-4 z-50 bg-white/95 backdrop-blur-md animate-fade">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rsjpd-accent rounded-lg flex items-center justify-center text-white text-sm border border-slate-800 shadow-xl">
-                    <i class="fas fa-file-medical"></i>
+        <div id="setup-form" class="hidden clinical-card p-10 space-y-8 text-center animate-fade">
+            <div class="space-y-6">
+                <div class="med-tech-aura">
+                    <i class="fas fa-shield-virus text-4xl text-slate-700 relative z-10"></i>
+                    <div class="absolute inset-0 bg-cyan-200 blur-3xl opacity-20 rounded-full animate-pulse"></div>
                 </div>
-                <div>
-                    <h2 id="patient-name" class="font-extrabold text-sm text-slate-900 uppercase tracking-tight"></h2>
-                    <p id="patient-room" class="text-[9px] text-slate-500 mt-0.5 font-bold tracking-widest uppercase"></p>
+
+                <div class="space-y-3">
+                    <h2 class="text-xl font-bold text-slate-950 tracking-wide uppercase">Mira Health</h2>
+                    <p class="text-[10px] text-slate-500 font-medium uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Digital Monitoring System</p>
+                </div>
+
+                <div class="obs-panel text-left">
+                    <p id="ai-welcome-msg" class="text-[11px] font-medium text-slate-700 leading-relaxed">
+                        Analisis Sistem: Mohon lengkapi data administratif pasien untuk memulai monitoring pemulihan.
+                    </p>
                 </div>
             </div>
-            <button onclick="resetApp()" class="w-9 h-9 rounded-full bg-slate-50 text-slate-400 hover:text-red-600 flex items-center justify-center border border-slate-100 transition-all">
+
+            <div class="space-y-4 pt-4">
+                <div class="text-left">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-1.5 block tracking-wider">Identitas Pasien</label>
+                    <input id="input-name" type="text" placeholder="Nama Lengkap Sesuai Gelang" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition-all text-sm">
+                </div>
+                <input id="input-room" type="text" placeholder="Nomor Kamar & Bed" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition-all text-sm">
+            </div>
+            
+            <button onclick="saveIdentity()" class="w-full mira-accent text-white font-bold py-5 rounded-xl uppercase text-xs tracking-[0.15em] hover:brightness-110 active:scale-[0.98] transition-all">
+                Aktifkan Sesi Monitoring
+            </button>
+        </div>
+
+        <div id="display-profile" class="hidden clinical-card p-5 flex justify-between items-center sticky top-4 z-50 bg-white/95 backdrop-blur-sm animate-fade">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 mira-accent rounded-lg flex items-center justify-center text-white text-xs border border-slate-600 shadow-inner">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div>
+                    <h2 id="patient-name" class="font-bold text-sm text-slate-950 uppercase tracking-tight"></h2>
+                    <p id="patient-room" class="text-[9px] text-slate-500 mt-0.5 font-semibold tracking-wider uppercase"></p>
+                </div>
+            </div>
+            <button onclick="resetApp()" class="w-9 h-9 rounded-lg bg-slate-50 text-slate-300 hover:text-red-500 flex items-center justify-center border border-slate-100 transition-all">
                 <i class="fas fa-power-off text-sm"></i>
             </button>
         </div>
 
         <div id="main-dashboard" class="hidden space-y-5 animate-fade">
             
-            <div class="clinical-card p-8 space-y-8">
+            <div class="clinical-card p-8 space-y-6">
                 <div class="flex justify-between items-center">
-                    <span id="hydration-alert" class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em]">Sistem RSJPD Online</span>
+                    <span id="hydration-alert" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Observasi Cloud...</span>
                     <span id="status-tag" class="status-pill status-normal">Sinkron</span>
                 </div>
                 
                 <div class="py-2 text-center">
-                    <span id="percent-display" class="text-7xl font-black tracking-tighter text-slate-950">0<small class="text-xl text-slate-300 font-bold ml-1">%</small></span>
-                    <p class="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-[0.2em]">Batas Cairan: 1.500 ml</p>
+                    <span id="percent-display" class="text-7xl font-extrabold tracking-tighter text-slate-950">0<small class="text-xl text-slate-300">%</small></span>
+                    <p class="text-[10px] text-slate-500 mt-2 font-semibold uppercase tracking-wider">Target Harian: 1.500 ml</p>
                 </div>
                 
-                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-50">
-                    <div id="progress-bar" class="rsjpd-accent h-full w-0 transition-all duration-1000 ease-out"></div>
-                </div>
-
-                <div id="edu-panel" class="obs-panel mt-4">
-                    <p id="edu-msg" class="text-[11px] font-medium text-slate-600 leading-relaxed italic">
-                        "Selamat datang. Pastikan asupan cairan Anda tetap dalam batas aman demi kesehatan jantung. Salam Sehat."
-                    </p>
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden shadow-inner border border-slate-200">
+                    <div id="progress-bar" class="mira-accent h-full w-0 transition-all duration-1000 ease-out"></div>
                 </div>
                 
-                <div class="grid grid-cols-3 gap-4 pt-2 border-t border-slate-50">
-                    <div class="text-center">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-2 tracking-widest">Asupan</p>
-                        <p class="text-sm font-extrabold text-slate-900" id="intake-display">0 ml</p>
+                <div class="grid grid-cols-3 gap-3 pt-5 border-t border-slate-100">
+                    <div class="text-center p-3 border border-slate-100 rounded-lg">
+                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Asupan</p>
+                        <p class="text-base font-bold text-slate-900" id="intake-display">0 ml</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-2 tracking-widest">Keluaran</p>
-                        <p class="text-sm font-extrabold text-slate-900" id="output-display">0 ml</p>
+                    <div class="text-center p-3 border border-slate-100 rounded-lg">
+                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Keluaran</p>
+                        <p class="text-base font-bold text-slate-900" id="output-display">0 ml</p>
                     </div>
-                    <div class="text-center">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-2 tracking-widest">Balance</p>
-                        <p class="text-sm font-extrabold text-slate-950" id="balance-display">0 ml</p>
+                    <div class="text-center p-3 border border-sky-100 bg-sky-50 rounded-lg">
+                        <p class="text-[8px] font-bold text-sky-600 uppercase mb-1.5 tracking-wider">Balance</p>
+                        <p class="text-base font-bold text-sky-900" id="balance-display">0 ml</p>
                     </div>
                 </div>
             </div>
 
-            <div class="clinical-card p-6 space-y-5">
+            <div class="clinical-card p-6 space-y-4">
                 <div class="flex gap-4">
                     <div class="flex-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2.5 block tracking-widest">Volume (ml)</label>
-                        <input id="fluid-amount" type="number" inputmode="numeric" placeholder="Contoh: 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-lg font-bold text-xl outline-none focus:border-slate-900 transition-all">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-wider">Volume Cairan (ml)</label>
+                        <input id="fluid-amount" type="number" inputmode="numeric" placeholder="Misal: 250" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl font-bold text-2xl outline-none focus:ring-2 focus:ring-slate-100 transition-all">
                     </div>
                     <div class="w-1/3">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2.5 block tracking-widest">Kategori</label>
-                        <select id="fluid-type" class="w-full h-[60px] bg-slate-50 border border-slate-200 px-3 rounded-lg font-bold text-xs outline-none">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 mb-2 block tracking-wider">Tipe Aktivitas</label>
+                        <select id="fluid-type" class="w-full h-[66px] bg-slate-50 border border-slate-200 px-3 rounded-xl font-bold text-xs outline-none focus:border-slate-400 transition-all">
                             <option value="IN">💧 Masuk</option>
                             <option value="OUT">🚽 Keluar</option>
                         </select>
                     </div>
                 </div>
 
-                <button id="submit-btn" onclick="addRecord()" class="w-full rsjpd-accent text-white font-bold py-5 rounded-lg shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-[10px] tracking-[0.2em]">
-                    Update Rekam Medis RSJPD
+                <button id="submit-btn" onclick="addRecord()" class="w-full mira-accent text-white font-bold py-5 rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-[0.15em]">
+                    Catat ke Rekam Medis Cloud
                 </button>
             </div>
 
             <div class="clinical-card p-6 space-y-5">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">Laporan Tren 7 Hari</h3>
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Laporan Tren Pemulihan 7 Hari</h3>
                 <div class="h-40 w-full">
                     <canvas id="weeklyChart"></canvas>
                 </div>
             </div>
         </div>
-
-        <div id="setup-form" class="hidden clinical-card p-10 space-y-8 text-center animate-fade">
-            <div class="w-16 h-16 rsjpd-accent rounded-2xl flex items-center justify-center mx-auto text-white shadow-xl"><i class="fas fa-shield-heart text-2xl"></i></div>
-            <h2 class="text-xl font-extrabold text-slate-950 uppercase tracking-tight">Monitoring RSJPD</h2>
-            <div class="space-y-4 pt-2">
-                <input id="input-name" type="text" placeholder="Nama Pasien" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg font-semibold outline-none text-sm">
-                <input id="input-room" type="text" placeholder="Kamar & Bed" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg font-semibold outline-none text-sm">
-            </div>
-            <button onclick="saveIdentity()" class="w-full rsjpd-accent text-white font-bold py-5 rounded-lg uppercase text-xs tracking-[0.2em] shadow-lg">Aktifkan Protokol RSJPD</button>
-        </div>
     </div>
 
     <script>
-        // URL ASLI ANDA - JANGAN DIRUBAH
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyilbUEyIqqcu-3q8uMZhD7wC7-1hIQf-355TBXC1HHO4FihCeBlgVE9m70hrQqK_lA/exec";
         const DAILY_LIMIT = 1500;
         let myChart = null;
 
+        // 1. Formal AI Greeting Logic
+        function setAiGreeting() {
+            const msgEl = document.getElementById('ai-welcome-msg');
+            const hrs = new Date().getHours();
+            let greet = (hrs < 11) ? "Selamat Pagi" : (hrs < 15) ? "Selamat Siang" : (hrs < 19) ? "Selamat Sore" : "Selamat Malam";
+            msgEl.innerText = `${greet}! Sistem monitoring siap memantau perkembangan asupan cairan Anda. Salam Sehat.`;
+        }
+
+        // 2. Cloud Data Sync
         async function syncWithCloud() {
             const name = localStorage.getItem('mira_name');
             const room = localStorage.getItem('mira_room');
             if(!name || !room) {
                 document.getElementById('setup-form').classList.remove('hidden');
+                setAiGreeting();
                 return;
             }
             document.getElementById('display-profile').classList.remove('hidden');
@@ -138,9 +213,10 @@
                 const data = await response.json();
                 updateDisplay(data.totalIn || 0, data.totalOut || 0, data.lastUpdate);
                 if(data.weekly) renderChart(data.weekly);
-            } catch (e) { console.error("Koneksi gagal:", e); }
+            } catch (e) { console.error(e); }
         }
 
+        // 3. Clinical Data Recording
         async function addRecord() {
             const amountInput = document.getElementById('fluid-amount');
             const type = document.getElementById('fluid-type').value;
@@ -151,9 +227,8 @@
             amountInput.classList.remove('border-red-400');
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-sync fa-spin"></i> Sinkronisasi RSJPD...`;
+            btn.innerHTML = `<i class="fas fa-sync fa-spin"></i> Menghubungkan Cloud...`;
 
-            // STRUKTUR DATA ASLI - SESUAI SCRIPT LAMA ANDA
             try {
                 const response = await fetch(GAS_URL, {
                     method: 'POST',
@@ -168,51 +243,49 @@
                 const result = await response.json();
                 updateDisplay(result.totalIn, result.totalOut, new Date().toISOString());
                 if(result.weekly) renderChart(result.weekly);
-                
                 amountInput.value = '';
-                btn.innerHTML = `<i class="fas fa-check-circle"></i> Berhasil Disimpan`;
-                btn.classList.add('bg-emerald-700');
-
-                // Update Edukasi Berdasarkan Cairan
-                updateEduMessage(result.totalIn);
-
+                btn.innerHTML = `<i class="fas fa-check-circle"></i> Data Tersimpan`;
+                btn.classList.replace('mira-accent', 'bg-slate-700');
+                btn.classList.add('bg-emerald-600');
             } catch (e) { 
                 btn.innerHTML = `Gagal Koneksi`;
-                btn.classList.add('bg-rose-700');
+                btn.classList.replace('mira-accent', 'bg-rose-500');
             } finally {
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerHTML = `Update Rekam Medis RSJPD`;
-                    btn.className = "w-full rsjpd-accent text-white font-bold py-5 rounded-lg shadow-xl flex items-center justify-center gap-3 uppercase text-[10px] tracking-[0.2em]";
+                    btn.innerHTML = `Catat ke Rekam Medis Cloud`;
+                    btn.className = "w-full mira-accent text-white font-bold py-5 rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-[0.15em]";
                 }, 2000);
             }
         }
 
+        // 4. Clinical UI Render & Reminder
         function updateDisplay(tin, tout, lastUpdate) {
             const balance = tin - tout;
             const percent = Math.min((tin / DAILY_LIMIT) * 100, 100);
             document.getElementById('intake-display').innerText = tin + " ml";
             document.getElementById('output-display').innerText = tout + " ml";
-            document.getElementById('balance-display').innerText = (balance > 0 ? "+" : "") + balance + " ml";
-            document.getElementById('percent-display').innerHTML = `${Math.round(percent)}<small class="text-xl text-slate-300 font-bold ml-1">%</small>`;
+            document.getElementById('balance-display').innerText = balance + " ml";
+            document.getElementById('percent-display').innerHTML = `${Math.round(percent)}<small class="text-xl text-slate-300">%</small>`;
             document.getElementById('progress-bar').style.width = percent + '%';
             
+            const alertTag = document.getElementById('hydration-alert');
+            if(lastUpdate) {
+                const diff = (new Date() - new Date(lastUpdate)) / (1000 * 60 * 60);
+                if(diff > 2) {
+                    alertTag.innerText = "⚠️ Belum ada asupan > 2 jam";
+                    alertTag.className = "text-[9px] font-bold text-rose-600 uppercase tracking-wider";
+                } else {
+                    alertTag.innerText = "💧 Hidrasi Optimal";
+                    alertTag.className = "text-[9px] font-bold text-slate-400 uppercase tracking-widest";
+                }
+            }
             const tag = document.getElementById('status-tag');
-            tag.innerText = (percent >= 100) ? "🚨 KRITIS" : "✅ SINKRON";
+            tag.innerText = (percent >= 100) ? "KRITIS" : "SINKRON";
             tag.className = (percent >= 100) ? "status-pill status-critical" : "status-pill status-normal";
         }
 
-        function updateEduMessage(tin) {
-            const edu = document.getElementById('edu-msg');
-            if(tin >= DAILY_LIMIT) {
-                edu.innerText = "🚨 Batas tercapai. Mohon berhenti minum untuk sementara agar tidak terjadi penumpukan cairan pada jantung.";
-            } else if(tin > (DAILY_LIMIT * 0.8)) {
-                edu.innerText = "⚠️ Mendekati batas. Atur asupan minum Anda dengan perlahan sampai pergantian hari.";
-            } else {
-                edu.innerText = "✅ Kondisi terjaga. Teruskan mencatat asupan cairan Anda secara disiplin. Salam Sehat.";
-            }
-        }
-
+        // 5. Clinical Chart Render
         function renderChart(history) {
             const ctx = document.getElementById('weeklyChart').getContext('2d');
             if(myChart) myChart.destroy();
@@ -222,19 +295,22 @@
                     labels: history.labels,
                     datasets: [{
                         data: history.values,
-                        borderColor: '#0f172a',
-                        backgroundColor: 'rgba(15, 23, 42, 0.05)',
+                        borderColor: '#334155',
+                        backgroundColor: 'rgba(51, 65, 85, 0.03)',
                         fill: true,
-                        tension: 0.1,
+                        tension: 0.2,
                         borderWidth: 2,
-                        pointRadius: 2
+                        pointRadius: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 9, weight: '700' }, color: '#94a3b8' } } }
+                    scales: { 
+                        y: { display: false }, 
+                        x: { grid: { display: false }, ticks: { font: { size: 9, weight: '500' }, color: '#64748b' } } 
+                    }
                 }
             });
         }
@@ -249,7 +325,7 @@
             }
         }
 
-        function resetApp() { if(confirm("Hapus sesi observasi pasien?")) { localStorage.clear(); location.reload(); } }
+        function resetApp() { if(confirm("Hapus sesi klinis pasien?")) { localStorage.clear(); location.reload(); } }
         document.addEventListener('DOMContentLoaded', syncWithCloud);
     </script>
 </body>
